@@ -23,7 +23,7 @@ function AIImageGeneratorPage() {
           <div className="mb-6 text-center md:mb-10 md:text-left">
             <div className="border-primary/20 bg-primary/10 text-primary inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold">
               <Sparkles className="size-3.5" />
-              <span>Nanobanana Joyflix Studio</span>
+              <span>Screenshots to Video Studio</span>
             </div>
             <h1 className="text-foreground mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl md:text-5xl">
               {m['app.generator.image_title']()}

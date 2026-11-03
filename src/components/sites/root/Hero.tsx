@@ -34,7 +34,7 @@ export function Hero() {
       <div className="relative z-10 container mx-auto max-w-5xl px-4 text-center sm:px-6">
         {/* Main Headline */}
         <h1 className="text-foreground mx-auto mb-6 max-w-4xl font-serif text-4xl leading-[1.15] font-bold tracking-tight sm:text-6xl lg:text-7xl">
-          <span className="text-primary font-bold">Nanobanana Joyflix</span>{' '}
+          <span className="text-primary font-bold">Screenshots to Video</span>{' '}
           {m['landing.hero.title_part']()}
         </h1>
 

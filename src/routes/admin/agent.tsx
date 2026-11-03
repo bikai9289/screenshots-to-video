@@ -87,10 +87,10 @@ function projectSlug(appName: string, origin: string) {
     const url = new URL(origin);
     if (!['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))
       return clean(url.hostname.replace(/^www\./, ''));
-    const base = clean(appName) || 'shipany';
+    const base = clean(appName) || 'screenshots-to-video';
     return url.port ? `${base}-${url.port}` : base;
   } catch {
-    return clean(appName) || 'shipany';
+    return clean(appName) || 'screenshots-to-video';
   }
 }
 

@@ -17,7 +17,7 @@ export async function handleAdminMcp(request: Request) {
     if (origin && origin !== new URL(request.url).origin)
       throw new AdminError('Origin not allowed', 403);
     const actor = await authenticateAdmin(request);
-    const site = envConfigs.app_name || 'ShipAny';
+    const site = envConfigs.app_name || 'Screenshots to Video';
     const siteUrl = (envConfigs.app_url || new URL(request.url).origin).replace(
       /\/$/,
       ''
@@ -29,7 +29,7 @@ export async function handleAdminMcp(request: Request) {
         const server = new McpServer(
           { name: 'shipany-admin', title: site, version: '1.0.0' },
           {
-            instructions: `Admin API of "${site}" (${siteUrl}). Every tool acts on this site only, with the permissions of the agent account that owns the key. If several ShipAny sites are connected, confirm which site the user means before any write, and never reuse an ID from one site on another.`,
+            instructions: `Admin API of "${site}" (${siteUrl}). Every tool acts on this site only, with the permissions of the agent account that owns the key. If several sites are connected, confirm which site the user means before any write, and never reuse an ID from one site on another.`,
           }
         );
         for (const operation of availableOperations(actor)) {

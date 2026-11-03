@@ -1,6 +1,6 @@
-# Nanobanana Joyflix — AI Studio & SaaS Engine
+# Screenshots to Video
 
-A production-ready, full-stack AI generation studio and SaaS boilerplate built on **TanStack Start** (React 19, Vite 8, Nitro, TypeScript), **Drizzle ORM**, **better-auth**, and **shadcn/ui v4**. Features complete generation pipelines for Image, Video, Music, and PNG background removal alongside enterprise SaaS business logic (Credits, Payments, Subscriptions, RBAC, i18n, CMS).
+A paid screenshot-to-video product for demo and launch videos, built on **TanStack Start**, **Drizzle ORM**, **better-auth**, and **shadcn/ui v4**. Product behavior, setup requirements, and integration verification status are documented in [docs/implementation-status.md](docs/implementation-status.md).
 
 ---
 
@@ -112,7 +112,7 @@ src/
 ```env
 # App
 VITE_APP_URL=http://localhost:3000
-VITE_APP_NAME=Nanobanana Joyflix
+VITE_APP_NAME=Screenshots to Video
 VITE_APP_DESCRIPTION=AI Video, Image & Music Generation Studio
 VITE_APP_LOGO=/logo.svg
 VITE_DEFAULT_LOCALE=en

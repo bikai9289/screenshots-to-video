@@ -23,7 +23,7 @@ function AIVideoGeneratorPage() {
           <div className="mb-6 text-center md:mb-10 md:text-left">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-600 dark:text-purple-400">
               <Sparkles className="size-3.5" />
-              <span>Nanobanana Joyflix Cinema</span>
+              <span>Screenshots to Video Cinema</span>
             </div>
             <h1 className="text-foreground mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl md:text-5xl">
               {m['app.generator.video_title']()}

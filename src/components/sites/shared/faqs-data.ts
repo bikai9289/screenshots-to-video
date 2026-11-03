@@ -10,7 +10,7 @@ export const FEATURE_FAQS: Partial<Record<FeatureType, FAQItem[]>> = {
     {
       question: 'How does text to image AI turn prompts into art?',
       answer:
-        'Nanobanana Joyflix uses cutting-edge diffusion and autoregressive foundation models. When you type a prompt, the model tokenizes the words into semantic vectors and progressively refines visual noise into a crisp, high-resolution image that reflects every detail of your prompt.',
+        'Screenshots to Video uses cutting-edge diffusion and autoregressive foundation models. When you type a prompt, the model tokenizes the words into semantic vectors and progressively refines visual noise into a crisp, high-resolution image that reflects every detail of your prompt.',
     },
     {
       question: 'Which AI image generator should I choose for daily content?',
@@ -20,7 +20,7 @@ export const FEATURE_FAQS: Partial<Record<FeatureType, FAQItem[]>> = {
     {
       question: 'Can I use generated images commercially?',
       answer:
-        'Yes, all images generated on Nanobanana Joyflix belong to you according to our terms of service, allowing full commercial use for branding, digital assets, and physical merchandise.',
+        'Yes, all images generated on Screenshots to Video belong to you according to our terms of service, allowing full commercial use for branding, digital assets, and physical merchandise.',
     },
   ],
 
@@ -33,7 +33,7 @@ export const FEATURE_FAQS: Partial<Record<FeatureType, FAQItem[]>> = {
     {
       question: 'What file formats and dimensions are supported?',
       answer:
-        'Nanobanana Joyflix supports PNG, JPG, WEBP, and TIFF files up to 25MB each. Resolution up to 4096x4096 is processed natively.',
+        'Screenshots to Video supports PNG, JPG, WEBP, and TIFF files up to 25MB each. Resolution up to 4096x4096 is processed natively.',
     },
   ],
 

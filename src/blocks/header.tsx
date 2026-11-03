@@ -22,7 +22,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 
 /**
  * 全站前台顶部导航栏
- * 包含 Nanobanana Joyflix Logo 与名称、创作 (AI图像/AI视频)、提示词库 (图像/视频)、作品展厅 (图像/视频)、定价方案、多语言选择、主题切换与用户登录态
+ * 包含 Screenshots to Video Logo 与名称、创作 (AI图像/AI视频)、提示词库 (图像/视频)、作品展厅 (图像/视频)、定价方案、多语言选择、主题切换与用户登录态
  */
 export function Header() {
   const [mounted, setMounted] = useState(false);
@@ -59,7 +59,7 @@ export function Header() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const appName = useAppName() || 'Nanobanana Joyflix';
+  const appName = useAppName() || 'Screenshots to Video';
 
   return (
     <header

@@ -18,7 +18,6 @@ import {
   Plus,
   RefreshCw,
   ScanEye,
-  ScanLine,
   Sparkles,
   X,
 } from 'lucide-react';
@@ -43,8 +42,7 @@ export function ScreenshotBrand() {
   return (
     <Link className="brand" href="/" aria-label="Screenshots to Video">
       <span className="brandmark">
-        <ScanLine aria-hidden="true" />
-        <Play className="brand-play" aria-hidden="true" />
+        <img src="/logo.svg" width="36" height="36" alt="" />
       </span>
       <span>
         screenshots<span className="brand-to">to</span>video

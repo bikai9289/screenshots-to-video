@@ -171,7 +171,7 @@ export const testSpecs: Record<string, TestSpec> = {
         name: 'filename',
         label: 'Test filename',
         type: 'text',
-        defaultValue: 'shipany-settings-test.txt',
+        defaultValue: 'screenshots-settings-test.txt',
       },
     ],
   },

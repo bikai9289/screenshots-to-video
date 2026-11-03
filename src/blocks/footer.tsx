@@ -79,12 +79,7 @@ export function Footer() {
 
   const socials: FooterSocial[] = [
     { icon: BlogIcon, href: '/posts', label: m['landing.footer.blog']() },
-    { icon: MailIcon, href: 'mailto:support@stp.ai', label: 'Support' },
-    {
-      icon: XIcon,
-      href: 'https://x.com/nanobanana_joyflix_ai',
-      label: 'Twitter (X)',
-    },
+    { icon: MailIcon, href: '/contact', label: 'Support' },
   ];
 
   return (

@@ -23,6 +23,12 @@
 .stv-site .brandmark svg {
   flex-shrink: 0;
 }
+.stv-site .brandmark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 .stv-site .footer .brand {
   font-size: 20px;
 }

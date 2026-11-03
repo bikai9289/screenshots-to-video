@@ -313,7 +313,7 @@ export function getSettings(): Setting[] {
       name: 'app_name',
       title: 'App Name',
       type: 'text',
-      placeholder: 'Nanobanana Joyflix',
+      placeholder: 'Screenshots to Video',
       group: 'appinfo',
       tab: 'general',
     },

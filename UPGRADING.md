@@ -1,5 +1,11 @@
 # Upgrading an existing project
 
+## 2026-11-03: Product branding
+
+- Replace the template favicon, logo, touch icon and social preview with the Screenshots to Video identity. Icon links include a version to refresh cached browser icons.
+- Product names in both locales and legacy page fallbacks now match the product. Unpublished template blog posts and the unused template badge were removed. Internal admin skill paths, protocol names and historical product IDs remain compatible.
+- Install setup uses Node rather than POSIX shell commands, including on Windows. It creates the data directory and only copies a schema when one is missing.
+
 ## 2026-11-03: Screenshots to Video product implementation
 
 - Auth no longer trusts arbitrary request `Origin` values. Same-origin requests and explicitly configured `AUTH_TRUSTED_ORIGINS` remain allowed. `pnpm test:auth:real` verifies actual registration/session/login and paid-access denial against a fresh isolated database, including rejection of an untrusted origin; it requires a current production build and free local port 3002.

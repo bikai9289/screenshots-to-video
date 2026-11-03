@@ -52,7 +52,7 @@ export const BLOG_POSTS: Record<string, BlogPost> = {
       {
         heading: 'Why Wan 2.7 Matters for Creators',
         paragraphs: [
-          'With flexible credit tiers on Nanobanana Joyflix, creators can leverage Wan 2.7 directly in their creative workflows without dedicated local hardware or complex model tuning.',
+          'With flexible credit tiers on Screenshots to Video, creators can leverage Wan 2.7 directly in their creative workflows without dedicated local hardware or complex model tuning.',
         ],
       },
     ],
@@ -89,9 +89,9 @@ export const BLOG_POSTS: Record<string, BlogPost> = {
   },
   'pixany-ai-introduction': {
     slug: 'pixany-ai-introduction',
-    title: 'Nanobanana Joyflix: All-in-One Creative AI Platform',
+    title: 'Screenshots to Video: All-in-One Creative AI Platform',
     description:
-      'Nanobanana Joyflix is an all-in-one creative platform offering AI-powered image generation, music creation, and video production for creators.',
+      'Screenshots to Video is an all-in-one creative platform offering AI-powered image generation, music creation, and video production for creators.',
     date: 'January 2025',
     readTime: '3 min read',
     tag: 'Platform News',
@@ -100,7 +100,7 @@ export const BLOG_POSTS: Record<string, BlogPost> = {
       {
         heading: 'A Unified Creative Hub',
         paragraphs: [
-          'Instead of juggling five different subscriptions for image generators, video tools, and music creators, Nanobanana Joyflix unifies industry-leading foundation models under one flexible credit package.',
+          'Instead of juggling five different subscriptions for image generators, video tools, and music creators, Screenshots to Video unifies industry-leading foundation models under one flexible credit package.',
           'Creators can prototype concepts in image models, animate them with video generators, and score the final piece with custom music — all from a single browser workspace.',
         ],
       },

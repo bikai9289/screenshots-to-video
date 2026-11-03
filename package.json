@@ -1,5 +1,5 @@
 {
-  "name": "shipany-tanstack",
+  "name": "screenshots-to-video",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -21,7 +21,7 @@
     "cf:build": "NITRO_PRESET=cloudflare_module vite build",
     "cf:whoami": "wrangler whoami",
     "cf:deploy": "sh -c 'set -a && [ -f .env.production ] && . ./.env.production; set +a && pnpm cf:build && exec pnpm exec wrangler deploy'",
-    "postinstall": "mkdir -p data && (test -f src/config/db/schema.ts || node scripts/db-setup.mjs)",
+    "postinstall": "node scripts/postinstall.mjs",
     "db:setup": "node scripts/db-setup.mjs",
     "db:push": "tsx scripts/with-env.ts drizzle-kit push --config=drizzle.config.ts",
     "db:generate": "tsx scripts/with-env.ts drizzle-kit generate --config=drizzle.config.ts",

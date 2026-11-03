@@ -194,8 +194,7 @@ export const Route = createRootRoute({
         { charSet: 'utf-8' },
         {
           name: 'viewport',
-          content:
-            'width=device-width, initial-scale=1',
+          content: 'width=device-width, initial-scale=1',
         },
         { title: appName },
         { name: 'description', content: appDescription },
@@ -223,16 +222,20 @@ export const Route = createRootRoute({
         { property: 'og:title', content: appName },
         { property: 'og:description', content: appDescription },
         { property: 'og:url', content: canonicalUrl },
-        { property: 'og:image', content: `${appUrl}/logo.png` },
+        { property: 'og:image', content: `${appUrl}/og-image.png` },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:title', content: appName },
         { name: 'twitter:description', content: appDescription },
-        { name: 'twitter:image', content: `${appUrl}/logo.png` },
+        { name: 'twitter:image', content: `${appUrl}/og-image.png` },
       ],
       links: [
-        { rel: 'icon', href: '/favicon.ico', type: 'image/x-icon' },
-        { rel: 'shortcut icon', href: '/favicon.ico', type: 'image/x-icon' },
-        { rel: 'apple-touch-icon', href: '/logo.png' },
+        { rel: 'icon', href: '/logo.svg?v=stv-1', type: 'image/svg+xml' },
+        {
+          rel: 'alternate icon',
+          href: '/favicon.ico?v=stv-1',
+          type: 'image/x-icon',
+        },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png?v=stv-1' },
       ],
       scripts: [
         {
