@@ -29,11 +29,15 @@
 
 以上为阶段记录，最终完成前必须重新跑全套检查，不能引用旧结果代替新验证。
 
+## 配置方式（2026-11-03 更新）
+
+Admin → Settings 面板已移除；SeeAPI / Stripe / R2 等密钥与启用开关**只通过环境变量或 `wrangler secret put` 配置**。`getAllConfigs()` 合并规则：非空 env 覆盖 DB，DB 不能覆盖已设置的 env。
+
 ## 外部配置缺失
 
 整体目标状态：阻塞，未完成。相同缺失配置已在多轮实际检查中复现；不得用本地模拟替代真实支付、出片和生产上线证据。
 
-本机实际检查：SeeAPI key、Stripe key/webhook secret、私有输入桶及 R2 凭据均未配置。已请求用户在 `.env.development` 或后台填写，不在聊天中发送密钥。
+本机实际检查：SeeAPI key、Stripe key/webhook secret、私有输入桶及 R2 凭据均未配置。已请求用户在 `.env.development` / wrangler secrets 填写，不在聊天中发送密钥；后台 Settings 已禁用。
 
 配置完成后：验证 SeeAPI 账户模型权限、余额与真实出片；Stripe 测试模式支付、回调与退款；R2 私有访问和生命周期；再进行正式部署、GPT 公网抓取和独立问题测试。
 

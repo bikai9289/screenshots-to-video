@@ -1,9 +1,5 @@
-import {
-  getCustomConfigs,
-  replaceCustomConfigs,
-  type CustomConfig,
-} from '@/modules/config/service';
-import { respData, respErr, respOk } from '@/lib/resp';
+import { getCustomConfigs } from '@/modules/config/service';
+import { respData, respErr } from '@/lib/resp';
 
 import type { AdminHandlerContext } from '../types';
 
@@ -12,6 +8,9 @@ const noStore = {
     'Cache-Control': 'no-store, no-cache, must-revalidate',
   },
 };
+
+const WRITE_DISABLED =
+  'Admin settings writes are disabled. Configure via environment variables or wrangler secrets.';
 
 export async function GET({ request, actor }: AdminHandlerContext) {
   try {
@@ -23,15 +22,7 @@ export async function GET({ request, actor }: AdminHandlerContext) {
 }
 
 export async function POST({ request, actor }: AdminHandlerContext) {
-  try {
-    const body = await request.json();
-    const configs: CustomConfig[] = Array.isArray(body?.configs)
-      ? body.configs
-      : [];
-
-    await replaceCustomConfigs(configs);
-    return respOk(noStore);
-  } catch (error: any) {
-    return respErr(error.message || 'Internal error');
-  }
+  void request;
+  void actor;
+  return respErr(WRITE_DISABLED);
 }

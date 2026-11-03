@@ -1,9 +1,7 @@
-import { eq } from 'drizzle-orm';
-
 import { db, hasDatabaseConfigured, isCloudflareWorker } from '@/core/db';
 import { envConfigs } from '@/config';
 import { config } from '@/config/db/schema';
-import { decryptSecret, encryptSecret, isEncryptedSecret } from '@/lib/crypto';
+import { decryptSecret, isEncryptedSecret } from '@/lib/crypto';
 
 import { getSettings } from './settings';
 
@@ -68,11 +66,26 @@ export async function getDbConfigs(): Promise<ConfigMap> {
 }
 
 /**
- * Get all configs merged: env + database (database overrides env).
+ * Non-empty env values always win over DB (admin Settings UI removed).
+ * Empty env strings do not overlay, so unset vars leave room for legacy DB rows.
+ */
+export function pickNonEmptyEnvConfigs(env: ConfigMap = envConfigs): ConfigMap {
+  const out: ConfigMap = {};
+  for (const [key, value] of Object.entries(env)) {
+    if (typeof value === 'string' && value.trim() !== '') {
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
+/**
+ * Get all configs merged: database first, then non-empty env (env wins).
  */
 export async function getAllConfigs(): Promise<ConfigMap> {
   const dbConfigs = await getDbConfigs();
-  return { ...envConfigs, ...dbConfigs };
+  // Env always wins when set — secrets/providers come from wrangler secrets / .env only.
+  return { ...dbConfigs, ...pickNonEmptyEnvConfigs(envConfigs) };
 }
 
 /**
@@ -180,49 +193,13 @@ export function assertEndpointSecretsResupplied(
 }
 
 /**
- * Save multiple configs to database (upsert). Protected keys are silently
- * dropped — see PROTECTED_CONFIG_KEYS. Masked values round-tripped from the
- * admin UI are skipped (the user didn't change them). Secret keys are
- * encrypted at rest — see SECRET_SETTING_NAMES / SECRET_KEY_PATTERN.
+ * Admin Settings UI is disabled — secrets/providers must come from env /
+ * wrangler secrets. Writes always fail so the DB cannot override env.
  */
-export async function saveConfigs(configs: ConfigMap) {
-  assertEndpointSecretsResupplied(configs, await getAllConfigs());
-  const entries = await Promise.all(
-    Object.entries(configs)
-      .filter(
-        ([name, value]) =>
-          !PROTECTED_CONFIG_KEYS.has(name) && !isMaskedConfigValue(value)
-      )
-      .map(
-        async ([name, value]): Promise<[string, string]> =>
-          isSecretConfigKey(name)
-            ? [name, await encryptSecret(value)]
-            : [name, value]
-      )
+export async function saveConfigs(_configs: ConfigMap): Promise<never> {
+  throw new Error(
+    'Admin settings writes are disabled. Configure via environment variables or wrangler secrets.'
   );
-  if (entries.length === 0) {
-    return;
-  }
-
-  await db().transaction(async (tx: any) => {
-    for (const [name, value] of entries) {
-      const [existing] = await tx
-        .select()
-        .from(config)
-        .where(eq(config.name, name))
-        .limit(1);
-
-      if (existing) {
-        await tx.update(config).set({ value }).where(eq(config.name, name));
-      } else {
-        await tx.insert(config).values({ name, value });
-      }
-    }
-  });
-
-  // Invalidate cache
-  cachedConfigs = null;
-  cacheTime = 0;
 }
 
 /**
@@ -250,9 +227,6 @@ export async function getAdminConfigs(): Promise<ConfigMap> {
 }
 
 // --- Custom configs -------------------------------------------------------
-
-/** Valid custom config key: letters, digits, and `_ . : -`. */
-const CUSTOM_KEY_PATTERN = /^[A-Za-z0-9_.:-]+$/;
 
 /**
  * Keys that are "known" to the system — predefined settings plus every env
@@ -289,64 +263,14 @@ export async function getCustomConfigs(): Promise<CustomConfig[]> {
 }
 
 /**
- * Replace the entire set of custom configs: upsert the provided pairs and
- * delete any previously-stored custom key that's no longer present. Reserved
- * keys are rejected so the custom tab can't shadow a predefined setting.
+ * Admin Settings UI is disabled — custom config tab writes are blocked.
  */
 export async function replaceCustomConfigs(
-  pairs: CustomConfig[]
-): Promise<void> {
-  const reserved = reservedConfigKeys();
-  const seen = new Set<string>();
-  const clean: Array<[string, string]> = [];
-
-  for (const pair of pairs) {
-    const key = (pair?.key ?? '').trim();
-    if (!key) continue; // skip blank rows
-    if (reserved.has(key)) throw new Error(`Reserved key not allowed: ${key}`);
-    if (!CUSTOM_KEY_PATTERN.test(key)) throw new Error(`Invalid key: ${key}`);
-    if (seen.has(key)) throw new Error(`Duplicate key: ${key}`);
-    seen.add(key);
-    clean.push([key, pair.value ?? '']);
-  }
-
-  const dbConfigs = await getDbConfigs();
-  const existingCustom = Object.keys(dbConfigs).filter((n) => !reserved.has(n));
-  const keep = new Set(clean.map(([k]) => k));
-  const toDelete = existingCustom.filter((k) => !keep.has(k));
-
-  const entries = await Promise.all(
-    clean
-      .filter(([, value]) => !isMaskedConfigValue(value))
-      .map(
-        async ([name, value]): Promise<[string, string]> =>
-          isSecretConfigKey(name)
-            ? [name, await encryptSecret(value)]
-            : [name, value]
-      )
+  _pairs: CustomConfig[]
+): Promise<never> {
+  throw new Error(
+    'Admin settings writes are disabled. Configure via environment variables or wrangler secrets.'
   );
-
-  await db().transaction(async (tx: any) => {
-    for (const name of toDelete) {
-      await tx.delete(config).where(eq(config.name, name));
-    }
-    for (const [name, value] of entries) {
-      const [existing] = await tx
-        .select()
-        .from(config)
-        .where(eq(config.name, name))
-        .limit(1);
-      if (existing) {
-        await tx.update(config).set({ value }).where(eq(config.name, name));
-      } else {
-        await tx.insert(config).values({ name, value });
-      }
-    }
-  });
-
-  // Invalidate cache
-  cachedConfigs = null;
-  cacheTime = 0;
 }
 
 /**

@@ -38,6 +38,16 @@ export const envConfigs: Record<string, string> = {
   stripe_secret_key: procEnv.STRIPE_SECRET_KEY ?? '',
   stripe_publishable_key: procEnv.STRIPE_PUBLISHABLE_KEY ?? '',
   stripe_signing_secret: procEnv.STRIPE_SIGNING_SECRET ?? '',
+  // Enable flags (admin Settings UI removed — set via env / wrangler secrets)
+  stripe_enabled:
+    procEnv.STRIPE_ENABLED ?? (procEnv.STRIPE_SECRET_KEY ? 'true' : ''),
+  select_payment_enabled: procEnv.SELECT_PAYMENT_ENABLED ?? '',
+  default_payment_provider: procEnv.DEFAULT_PAYMENT_PROVIDER ?? 'stripe',
+  creem_enabled: procEnv.CREEM_ENABLED ?? '',
+  waffo_enabled: procEnv.WAFFO_ENABLED ?? '',
+  paypal_enabled: procEnv.PAYPAL_ENABLED ?? '',
+  alipay_enabled: procEnv.ALIPAY_ENABLED ?? '',
+  wechat_enabled: procEnv.WECHAT_ENABLED ?? '',
 
   // Payment - PayPal
   paypal_client_id: procEnv.PAYPAL_CLIENT_ID ?? '',
@@ -65,7 +75,7 @@ export const envConfigs: Record<string, string> = {
   resend_sender_email:
     procEnv.RESEND_SENDER_EMAIL ?? procEnv.RESEND_EMAIL_FROM ?? '',
 
-  // Storage - S3/R2
+  // Storage - S3/R2 (general public/media storage)
   storage_endpoint: procEnv.STORAGE_ENDPOINT ?? '',
   storage_region: procEnv.STORAGE_REGION ?? 'auto',
   storage_access_key: procEnv.STORAGE_ACCESS_KEY ?? '',
@@ -74,17 +84,27 @@ export const envConfigs: Record<string, string> = {
   storage_public_domain: procEnv.STORAGE_PUBLIC_DOMAIN ?? '',
   inline_image_max_kb: procEnv.INLINE_IMAGE_MAX_KB ?? '5120',
 
-  // AI
+  // Storage keys used by modules/storage (r2_* naming from ShipAny)
+  r2_access_key: procEnv.R2_ACCESS_KEY ?? procEnv.STORAGE_ACCESS_KEY ?? '',
+  r2_secret_key: procEnv.R2_SECRET_KEY ?? procEnv.STORAGE_SECRET_KEY ?? '',
+  r2_account_id: procEnv.R2_ACCOUNT_ID ?? '',
+  r2_endpoint: procEnv.R2_ENDPOINT ?? procEnv.STORAGE_ENDPOINT ?? '',
+  r2_bucket_name: procEnv.R2_BUCKET_NAME ?? procEnv.STORAGE_BUCKET ?? '',
+  r2_domain: procEnv.R2_DOMAIN ?? procEnv.STORAGE_PUBLIC_DOMAIN ?? '',
+  r2_upload_path: procEnv.R2_UPLOAD_PATH ?? 'uploads',
+
+  // AI / screenshots product
   seeapi_api_key: procEnv.SEEAPI_API_KEY ?? '',
   screenshots_bucket: procEnv.SCREENSHOTS_STORAGE_BUCKET ?? '',
-  r2_access_key: procEnv.R2_ACCESS_KEY ?? '',
-  r2_secret_key: procEnv.R2_SECRET_KEY ?? '',
-  r2_account_id: procEnv.R2_ACCOUNT_ID ?? '',
-  r2_endpoint: procEnv.R2_ENDPOINT ?? '',
-  // OpenAI / Anthropic are admin-panel-only (like Gemini/Fal). No env fallback:
-  // OPENAI_API_KEY / ANTHROPIC_API_KEY are common ambient vars, and falling back
-  // to them would let the admin "Test" silently pass on the machine's own key.
+  // OpenAI / Anthropic intentionally omitted from env fallbacks (ambient key risk).
   replicate_api_token: procEnv.REPLICATE_API_TOKEN ?? '',
+
+  // Auth toggles (env-only; admin Settings UI disabled)
+  email_auth_enabled: procEnv.EMAIL_AUTH_ENABLED ?? 'true',
+  email_verification_enabled: procEnv.EMAIL_VERIFICATION_ENABLED ?? '',
+  google_auth_enabled: procEnv.GOOGLE_AUTH_ENABLED ?? '',
+  google_one_tap_enabled: procEnv.GOOGLE_ONE_TAP_ENABLED ?? '',
+  github_auth_enabled: procEnv.GITHUB_AUTH_ENABLED ?? '',
 
   // Locale (public)
   locale: publicEnv('VITE_DEFAULT_LOCALE') ?? 'en',

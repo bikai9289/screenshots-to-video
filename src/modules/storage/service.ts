@@ -2,9 +2,8 @@ import { R2Provider, StorageManager } from '@/core/storage';
 import { getAllConfigs, type ConfigMap } from '@/modules/config/service';
 
 /**
- * Storage config is DB-driven (like auth/payment/email): values come from the
- * admin "Storage" settings, merged over env via getAllConfigs(). Keys mirror the
- * original ShipAny Two (`r2_*`).
+ * Storage config via getAllConfigs(): non-empty env / wrangler secrets win over
+ * any legacy DB rows. Keys mirror ShipAny Two (`r2_*`).
  */
 function isConfigured(configs: ConfigMap): boolean {
   return Boolean(

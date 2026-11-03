@@ -7,9 +7,7 @@ import {
   Home,
   Image as ImageIcon,
   LayoutDashboard,
-  Settings,
   Shield,
-  Sparkles,
 } from 'lucide-react';
 
 import { envConfigs } from '@/config';
@@ -110,11 +108,6 @@ function AdminLayout() {
       href: '/admin/agent',
       label: m['admin.nav.agent'](),
       icon: Bot,
-    },
-    {
-      href: '/admin/settings',
-      label: m['admin.nav.settings'](),
-      icon: Settings,
     },
     { href: '/', label: m['common.systems.home'](), icon: Home, newTab: true },
   ];
