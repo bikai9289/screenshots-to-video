@@ -1,0 +1,33 @@
+export const meta = {
+  "title": "Privacy Policy",
+  "description": "How Screenshots to Video handles accounts, screenshots, drafts and generation results.",
+  "updated_at": "2026-11-03"
+};
+
+## 1. Accounts and purchases
+
+We process your account name, email, authentication details and purchase records to operate the service. Payment is handled by Stripe; our application does not store complete card numbers.
+
+## 2. Screenshots and generation
+
+When you submit a video request, we store the screenshots in a private object-storage bucket and send the prompt, settings and limited-time screenshot access links to SeeAPI. SeeAPI and the selected model process the materials to create the video. Do not upload confidential or personal information without the necessary authorization.
+
+## 3. Retention and access
+
+Screenshot uploads are no longer accepted for new tasks after 24 hours. Storage lifecycle deletion is configured for the private input bucket; physical deletion may follow the storage provider's lifecycle schedule. A signed input link is valid for one hour. Provider task data and generated files follow SeeAPI's own retention policy; download important results rather than relying on indefinite availability.
+
+## 4. Local drafts
+
+Studio stores your screenshot files and settings in this browser's IndexedDB, separately for each signed-in account, for draft recovery. Drafts expire in the application after 24 hours and are removed when next opened or when you use Clear draft. If you no longer open the app, you can remove them through your browser's site-data controls. A pending request key may also be retained locally to avoid duplicate paid requests.
+
+## 5. Attribution and analytics
+
+We use authentication cookies and may record sanitized campaign tags and external referrer hosts. Optional attribution stores first-touch information for up to 30 days and session information for up to 30 minutes, subject to the site's consent setting. Missing referrers remain unknown; they are not automatically classified as ChatGPT visits. Do not include personal data in campaign parameters.
+
+## 6. Your requests
+
+Use the Contact page to submit an account support request about access, correction, account deletion or removal of uploaded material. We verify ownership before acting. Deletion requests may require coordination with the generation provider and may be subject to necessary payment, security and legal record retention.
+
+## 7. Provider policies
+
+Review SeeAPI's privacy and data-handling policies and Stripe's privacy policy before sending material or making a purchase. We do not promise that provider-retained data is deleted when a browser draft or an application record expires.

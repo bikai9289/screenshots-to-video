@@ -1,0 +1,61 @@
+const { chromium } = require('C:/Users/Administrator/AppData/Local/Temp/stv-ui-tools/node_modules/playwright');
+const path = require('node:path');
+const fs = require('node:fs');
+const root = __dirname;
+const base = 'http://127.0.0.1:4311/screenshots-to-video/';
+(async () => {
+  const browser = await chromium.launch({ executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless:true });
+  const page = await browser.newPage({viewport:{width:1000,height:650}, deviceScaleFactor:2});
+  await page.goto(`${base}sample-app.html`);
+  await page.screenshot({path:path.join(root,'assets/orbit-dashboard.png')});
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('response', response => { if(response.status() >= 400 && !response.url().endsWith('/favicon.ico')) errors.push(`${response.status()} ${response.url()}`); });
+  const results = [];
+  for (const width of [1440,768,390,360]) {
+    await page.setViewportSize({width,height:width===1440 ? 1050 : 844});
+    await page.goto(base);
+    await page.waitForFunction(() => document.querySelector('.brandmark svg'));
+    await page.waitForTimeout(300);
+    const layout = await page.evaluate(() => {
+      const small = [...document.querySelectorAll('body *')].filter(el => {
+        const style=getComputedStyle(el);
+        return el.children.length===0 && el.textContent.trim() && el.getBoundingClientRect().width>0 && Number.parseFloat(style.fontSize)<14;
+      }).map(el=>el.textContent.slice(0,60));
+      return {viewport:innerWidth,pageWidth:document.documentElement.scrollWidth,smallText:small,images:[...document.images].every(img=>img.complete && img.naturalWidth>0)};
+    });
+    results.push(layout);
+    if(width===1440 || width===390) await page.screenshot({path:path.join(root,`preview-${width}.png`),fullPage:true});
+    if(width===1440) await page.screenshot({path:path.join(root,'preview-desktop.png')});
+    if(layout.pageWidth>width || layout.smallText.length || !layout.images) throw new Error(`Layout issue: ${JSON.stringify(layout)}`);
+  }
+  await page.getByRole('button',{name:'Open menu',exact:true}).click();
+  await page.getByRole('navigation').getByRole('link',{name:'Examples',exact:true}).click();
+  await page.getByRole('tab',{name:'Feature update'}).click();
+  if(await page.locator('.number-label').textContent()!=='02 / FEATURE UPDATE') throw new Error('Example tab failed');
+  await page.getByRole('tab',{name:'Feature update'}).press('ArrowRight');
+  if(await page.locator('.number-label').textContent()!=='03 / SOCIAL TEASER') throw new Error('Keyboard tab failed');
+  await page.getByRole('button',{name:'Create your video',exact:true}).first().click();
+  if(!await page.locator('dialog').evaluate(el=>el.open)) throw new Error('Create dialog failed');
+  await page.getByRole('button',{name:'Close',exact:true}).click();
+  await page.getByText('Is there a free plan?',{exact:true}).click();
+  if(!await page.locator('details').nth(1).evaluate(el=>el.open)) throw new Error('FAQ failed');
+  await page.getByRole('button',{name:'Pause demo',exact:true}).click();
+  const time1=await page.locator('.scrubber').inputValue();
+  await page.waitForTimeout(200);
+  const time2=await page.locator('.scrubber').inputValue();
+  if(time1!==time2) throw new Error('Pause did not stop playback');
+  await page.getByRole('button',{name:'Expand demo',exact:true}).click();
+  if(!await page.locator('.film').evaluate(el=>el.classList.contains('expanded'))) throw new Error('Expand failed');
+  await page.keyboard.press('Escape');
+  if(await page.locator('.film').evaluate(el=>el.classList.contains('expanded'))) throw new Error('Collapse failed');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto(base);
+  await page.waitForFunction(()=>document.querySelector('.brandmark svg'));
+  if(!await page.locator('.film').evaluate(el=>el.classList.contains('paused'))) throw new Error('Reduced motion failed');
+  const report={layout:results,runtimeErrors:errors,interactions:'menu, tabs, keyboard tabs, modal, FAQ, playback, expand, reduced motion passed'};
+  fs.writeFileSync(path.join(root,'verification.json'),JSON.stringify(report,null,2));
+  console.log(JSON.stringify(report,null,2));
+  await browser.close();
+  if(errors.length) process.exitCode=1;
+})().catch(error=>{console.error(error);process.exit(1)});

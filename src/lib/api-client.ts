@@ -1,0 +1,112 @@
+/**
+ * 通用 REST API 请求客户端
+ * 封装 fetch 请求、30s 超时控制、统一解包后端 { code, message, data } 响应格式，并在异常时抛出 ApiError
+ */
+export class ApiError extends Error {
+  constructor(
+    public code: number,
+    message: string,
+    public data?: unknown
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+/** 分页响应结构 */
+export interface PageResult<T> {
+  items: T[];
+  total: number;
+}
+
+/** 分页请求参数 */
+export interface PageParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+}
+
+async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
+  const signal = init?.signal;
+  const abortRequest = () => controller.abort();
+  if (signal?.aborted) {
+    controller.abort();
+  } else {
+    signal?.addEventListener('abort', abortRequest, { once: true });
+  }
+
+  try {
+    const res = await fetch(url, {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        ...(init?.body && !(init.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
+        ...init?.headers,
+      },
+    });
+    const json = await res.json().catch(() => ({
+      code: -1,
+      message: res.statusText || 'Request failed',
+    }));
+    if (json.code !== 0) {
+      throw new ApiError(
+        json.code ?? -1,
+        json.message || 'Request failed',
+        json.data
+      );
+    }
+    return json.data as T;
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener('abort', abortRequest);
+  }
+}
+
+export const apiGet = <T>(url: string, init?: RequestInit) =>
+  request<T>(url, init);
+
+export const apiPost = <T = void>(url: string, body?: unknown) =>
+  request<T>(url, {
+    method: 'POST',
+    body: body == null ? undefined : JSON.stringify(body),
+  });
+
+export const apiPut = <T = void>(url: string, body?: unknown) =>
+  request<T>(url, { method: 'PUT', body: JSON.stringify(body) });
+
+export const apiPatch = <T = void>(url: string, body?: unknown) =>
+  request<T>(url, { method: 'PATCH', body: JSON.stringify(body) });
+
+export const apiDelete = <T = void>(url: string) =>
+  request<T>(url, { method: 'DELETE' });
+
+export const apiUpload = <T>(url: string, form: FormData) =>
+  request<T>(url, { method: 'POST', body: form });
+
+// Query-string builder for paginated list endpoints.
+export function pageQuery(base: string, p: PageParams) {
+  const params = new URLSearchParams({
+    page: String(p.page),
+    pageSize: String(p.pageSize),
+  });
+  if (p.search) params.set('search', p.search);
+  return `${base}?${params}`;
+}
+
+/**
+ * Fetch every row of a paginated list (pickers, checklists). Admin list
+ * endpoints cap pageSize at 100, so walk the pages instead of asking for more.
+ */
+export async function apiGetAll<T>(base: string): Promise<T[]> {
+  const pageSize = 100;
+  const items: T[] = [];
+  for (let page = 1; ; page++) {
+    const res = await apiGet<PageResult<T>>(
+      pageQuery(base, { page, pageSize })
+    );
+    items.push(...res.items);
+    if (res.items.length < pageSize || items.length >= res.total) return items;
+  }
+}

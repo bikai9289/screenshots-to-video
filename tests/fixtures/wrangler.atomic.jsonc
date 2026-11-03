@@ -1,0 +1,11 @@
+{
+  "name": "stv-local-atomic-tests",
+  "main": "atomic-worker.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "stv-local-atomic-tests",
+    "database_id": "00000000-0000-0000-0000-000000000001"
+  }]
+}

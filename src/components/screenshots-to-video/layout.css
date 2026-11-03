@@ -1,0 +1,164 @@
+.stv-site {
+  min-height: 100vh;
+  color-scheme: light;
+}
+.stv-site button:disabled {
+  cursor: wait;
+}
+.stv-site .footer-policies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 14px;
+}
+.stv-site .faq-list {
+  min-width: 0;
+}
+.stv-site .film {
+  scroll-margin-top: 20px;
+}
+.stv-site .header {
+  top: var(--top-banner-height, 0px);
+}
+.stv-site .brandmark svg {
+  flex-shrink: 0;
+}
+.stv-site .footer .brand {
+  font-size: 20px;
+}
+.stv-site .contact-content {
+  min-height: 65vh;
+}
+.stv-site .contact-content h1 {
+  font-size: 48px;
+  max-width: 800px;
+  margin: 22px 0;
+}
+.stv-site .contact-content > p {
+  max-width: 600px;
+  margin-bottom: 24px;
+}
+.stv-site .contact-content .contact-hint {
+  font-size: 14px;
+  margin-top: 20px;
+}
+.stv-site .pricing-heading {
+  text-align: center;
+  max-width: 950px;
+  margin: 0 auto 48px;
+}
+.stv-site .pricing-heading h1 {
+  font-size: 54px;
+  margin: 18px 0 22px;
+}
+.stv-site .pricing-heading > p:last-child {
+  color: var(--muted);
+  font-size: 18px;
+}
+.stv-site .pack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.stv-site .pack {
+  border: 1px solid var(--line);
+  padding: 30px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+.stv-site .featured-pack {
+  background: #edf4e2;
+  border-color: #98ae7a;
+}
+.stv-site .pack-name {
+  min-height: 73px;
+}
+.stv-site .pack-name h2 {
+  font-size: 24px;
+}
+.stv-site .pack-name > span {
+  font-size: 14px;
+  display: block;
+  margin-top: 8px;
+  color: #4c6236;
+}
+.stv-site .pack-price {
+  font-size: 48px;
+  font-weight: 650;
+  line-height: 1.3;
+  margin-top: 12px;
+}
+.stv-site .pack-currency {
+  font-size: 14px;
+  color: var(--muted);
+}
+.stv-site .pack h3 {
+  margin: 30px 0 22px;
+}
+.stv-site .pack ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+  margin: 0 0 30px;
+  flex: 1;
+}
+.stv-site .pack li {
+  display: flex;
+  gap: 10px;
+  font-size: 15px;
+  align-items: flex-start;
+}
+.stv-site .pack li svg {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+}
+.stv-site .pack button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.stv-site .pricing-small {
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 24px;
+}
+.stv-site .pricing-small a {
+  display: inline-flex;
+  gap: 5px;
+  text-decoration: underline;
+}
+.stv-site .pricing-help {
+  text-align: center;
+  margin-top: 80px;
+}
+.stv-site .pricing-help h2 {
+  font-size: 30px;
+  margin-bottom: 18px;
+}
+@media (max-width: 800px) {
+  .stv-site .pack-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .stv-site .pack-name {
+    min-height: 0;
+  }
+  .stv-site .pricing-heading h1 {
+    font-size: 40px;
+  }
+  .stv-site .pack-price {
+    font-size: 44px;
+  }
+  .stv-site .contact-content h1 {
+    font-size: 38px;
+  }
+}
+@media (max-width: 480px) {
+  .stv-site .footer-policies {
+    width: 100%;
+    gap: 22px;
+  }
+}

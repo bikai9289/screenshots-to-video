@@ -1,0 +1,30 @@
+{
+  "layout": [
+    {
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "smallText": [],
+      "images": true
+    },
+    {
+      "viewport": 768,
+      "pageWidth": 768,
+      "smallText": [],
+      "images": true
+    },
+    {
+      "viewport": 390,
+      "pageWidth": 390,
+      "smallText": [],
+      "images": true
+    },
+    {
+      "viewport": 360,
+      "pageWidth": 360,
+      "smallText": [],
+      "images": true
+    }
+  ],
+  "runtimeErrors": [],
+  "interactions": "menu, tabs, keyboard tabs, modal, FAQ, playback, expand, reduced motion passed"
+}

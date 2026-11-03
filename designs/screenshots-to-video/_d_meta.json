@@ -1,0 +1,32 @@
+{
+  "type": "design",
+  "designSystems": [],
+  "primaryDesignSystem": null,
+  "assets": {
+    "Screenshots to Video — Homepage": {
+      "versions": [
+        {
+          "path": "index.html",
+          "createdAt": "2026-11-03T02:30:50.669Z",
+          "status": "needs-review",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          }
+        },
+        {
+          "path": "copy-v2.html",
+          "createdAt": "2026-11-03T02:36:16.086Z",
+          "status": "needs-review",
+          "subtitle": "Copy refinement; original UI preserved",
+          "viewport": {
+            "width": 1440,
+            "height": 950
+          }
+        }
+      ]
+    }
+  },
+  "createdAt": "2026-11-03T02:30:50.670Z",
+  "updatedAt": "2026-11-03T02:36:16.087Z"
+}
