@@ -22,7 +22,7 @@
     "cf:build": "NITRO_PRESET=cloudflare_module vite build",
     "postcf:build": "tsx scripts/finalize-cloudflare-build.ts",
     "cf:whoami": "wrangler whoami",
-    "cf:deploy": "sh -c 'set -a && [ -f .env.production ] && . ./.env.production; set +a && pnpm cf:build && exec pnpm exec wrangler deploy'",
+    "cf:deploy": "node scripts/deploy-cloudflare.mjs",
     "postinstall": "node scripts/postinstall.mjs",
     "db:setup": "node scripts/db-setup.mjs",
     "db:push": "tsx scripts/with-env.ts drizzle-kit push --config=drizzle.config.ts",

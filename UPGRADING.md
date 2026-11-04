@@ -1,5 +1,9 @@
 # Upgrading an existing project
 
+## 2026-11-04: Cross-platform Cloudflare deploy
+
+- `pnpm cf:deploy` uses a Node runner rather than POSIX shell syntax, including env-file loading, the Cloudflare build, thin-entry finalization, and Wrangler deployment. It requires Node 22, matching the project environment. Secret values are never passed as command arguments.
+
 ## 2026-11-04: Screenshot maintenance in Worker scheduled events
 
 - Cloudflare builds now finalize a thin `worker-entry.mjs` handler entry. This prevents Nitro's internal shared constants/tables from being interpreted as Worker handlers. Keep deployment pointed at the generated Wrangler config; do not deploy `index.mjs` directly.
