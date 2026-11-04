@@ -140,6 +140,104 @@
   text-align: center;
   margin-top: 80px;
 }
+.stv-site .purchase-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 48px;
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+}
+.stv-site .presales-contact {
+  margin: 32px 0;
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.stv-site .verified-demo {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  align-items: center;
+  gap: 60px;
+}
+.stv-site .verified-demo h2 {
+  font-size: clamp(30px, 3.5vw, 48px);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  margin: 18px 0 24px;
+  max-width: 450px;
+}
+.stv-site .verified-demo-copy > p:not(.eyebrow) {
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 430px;
+}
+.stv-site .verified-demo-meta {
+  display: block;
+  font-size: 14px;
+  margin: 24px 0 16px;
+}
+.stv-site .verified-demo figure {
+  margin: 0;
+  min-width: 0;
+}
+.stv-site .verified-demo video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  border-radius: 20px;
+  background: #101116;
+  border: 1px solid var(--line);
+}
+.stv-site .verified-demo figcaption {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 14px;
+}
+@media (max-width: 800px) {
+  .stv-site .verified-demo {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+.stv-site .presales-contact .inline-link {
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+.stv-site .purchase-details h2 {
+  font-size: 28px;
+  margin: 10px 0 16px;
+}
+.stv-site .purchase-details p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.stv-site .purchase-details dl {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+}
+.stv-site .purchase-details dt {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.stv-site .purchase-details dd {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+@media (max-width: 800px) {
+  .stv-site .purchase-details {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px;
+  }
+}
 .stv-site .pricing-help h2 {
   font-size: 30px;
   margin-bottom: 18px;

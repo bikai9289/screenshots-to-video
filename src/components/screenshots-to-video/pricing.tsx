@@ -9,11 +9,15 @@ import type { ScreenshotsCopy } from './types';
 export function ScreenshotPricing({
   copy,
   available,
+  availabilityStatus,
+  onRetry,
   pending,
   onBuy,
 }: {
   copy: ScreenshotsCopy;
   available: boolean;
+  availabilityStatus: 'loading' | 'ready' | 'error';
+  onRetry: () => void;
   pending: string | null;
   onBuy: (productId: string) => void;
 }) {
@@ -56,7 +60,11 @@ export function ScreenshotPricing({
               <button
                 type="button"
                 className="button dark"
-                disabled={!available || pending !== null}
+                disabled={
+                  availabilityStatus !== 'ready' ||
+                  !available ||
+                  pending !== null
+                }
                 onClick={() => onBuy(pack.productId)}
               >
                 {pending === pack.productId
@@ -71,16 +79,57 @@ export function ScreenshotPricing({
             </article>
           ))}
         </div>
+        <section
+          className="purchase-details"
+          aria-labelledby="purchase-details-title"
+        >
+          <div>
+            <p className="eyebrow">{copy.specsEyebrow}</p>
+            <h2 id="purchase-details-title">{copy.specsTitle}</h2>
+            <p>{copy.aiResultNote}</p>
+          </div>
+          <dl>
+            <div>
+              <dt>{copy.specsOutputLabel}</dt>
+              <dd>{copy.specsOutput}</dd>
+            </div>
+            <div>
+              <dt>{copy.specsDurationLabel}</dt>
+              <dd>{copy.specsDuration}</dd>
+            </div>
+            <div>
+              <dt>{copy.specsImagesLabel}</dt>
+              <dd>{copy.specsImages}</dd>
+            </div>
+          </dl>
+        </section>
         <p className="pricing-small">{copy.packValidity}</p>
-        {!available && (
+        {availabilityStatus !== 'ready' || !available ? (
           <p role="status" className="pricing-small">
-            {copy.purchaseUnavailable}{' '}
-            <Link href="/contact">
-              {copy.contact}
-              <ArrowUpRight aria-hidden="true" />
-            </Link>
+            {availabilityStatus === 'loading' ? (
+              copy.purchaseChecking
+            ) : (
+              <>
+                {availabilityStatus === 'error'
+                  ? copy.purchaseCheckFailed
+                  : copy.purchaseUnavailable}{' '}
+                {availabilityStatus === 'error' && (
+                  <button
+                    type="button"
+                    className="inline-link"
+                    onClick={onRetry}
+                  >
+                    {copy.purchaseRetry}
+                  </button>
+                )}{' '}
+                <Link href="/contact">
+                  {copy.contact}
+                  <ArrowUpRight aria-hidden="true" />
+                </Link>
+              </>
+            )}
           </p>
-        )}
+        ) : null}
         <div className="pricing-help">
           <h2>{copy.pricingQuestion}</h2>
           <p>{copy.pricingHelp}</p>

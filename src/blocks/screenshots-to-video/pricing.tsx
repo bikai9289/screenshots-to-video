@@ -14,7 +14,8 @@ import { getScreenshotsCopy } from './content';
 export function ScreenshotsPricing() {
   const copy = getScreenshotsCopy();
   const { data: session } = useSession();
-  const { data: configs } = usePublicConfig();
+  const configQuery = usePublicConfig();
+  const configs = configQuery.data;
   const router = useRouter();
   const available = configs?.screenshots_purchase_available === 'true';
   const checkout = useMutation({
@@ -53,6 +54,12 @@ export function ScreenshotsPricing() {
     <ScreenshotPricing
       copy={copy}
       available={available}
+      availabilityStatus={
+        configQuery.isError ? 'error' : configs ? 'ready' : 'loading'
+      }
+      onRetry={() => {
+        void configQuery.refetch();
+      }}
       pending={checkout.isPending ? checkout.variables : null}
       onBuy={buy}
     />

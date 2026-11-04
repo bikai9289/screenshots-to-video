@@ -25,3 +25,13 @@
 维护输出仅包含任务/素材 ID、状态和机器错误码，不含截图内容、提示词、签名链接或密钥。退出码 1 表示至少一次操作失败，不表示该生成已终态失败。无人值守调度须监控失败退出与长期 pending 记录。
 
 当前使用查询恢复；供应商 webhook 不处于已实现状态。若加入 webhook，先按供应商文档验证签名与重放窗口，再复用终态保护和归属校验，不能直接信任请求体中的成功状态。
+
+# Worker scheduled maintenance
+
+The existing Cloudflare `cloudflare:scheduled` hook now runs the same screenshot maintenance routine as the CLI, as well as the legacy AI jobs. A trigger alone was not sufficient in older releases: deploy this code before treating the screenshot maintenance schedule as enabled.
+
+For the existing `0 16 * * *` UTC trigger, the run is at 00:00 Asia/Shanghai. Each run handles up to 20 pending tasks and 50 expired inputs. Worker bindings and a fresh database scope are initialized even if no HTTP request has reached that isolate.
+
+Look for `Screenshot maintenance completed` and check `failed`, `retained`, and `deleted`. A query failure never settles a task as failed; assets referenced by unresolved tasks or malformed references are retained. Storage deletion must succeed before the metadata is removed. No error message alone proves provider failure or physical deletion.
+
+Local CLI still defaults to preview: `pnpm screenshots:maintain`; apply with `pnpm screenshots:maintain --apply`. Validate recovery and deletion using controlled test data before relying on production cleanup.

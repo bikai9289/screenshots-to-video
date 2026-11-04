@@ -1,5 +1,22 @@
 # Upgrading an existing project
 
+## 2026-11-04: Screenshot maintenance in Worker scheduled events
+
+- Cloudflare builds now finalize a thin `worker-entry.mjs` handler entry. This prevents Nitro's internal shared constants/tables from being interpreted as Worker handlers. Keep deployment pointed at the generated Wrangler config; do not deploy `index.mjs` directly.
+
+- Existing Cloudflare cron triggers now also recover pending screenshot renders and clean up unused expired inputs. The CLI shares the same implementation and retains preview-by-default behavior. No database migration or new secret is required.
+- Deploy the new plugin before considering cron maintenance effective. Uncertain tasks retain their reserved render and referenced inputs. Follow `docs/screenshots-operations.md` to inspect run summaries.
+
+## 2026-11-04: Pricing metadata and purchase availability
+
+- The homepage includes an actual five-second generated test output, separate from the illustrative motion preview. See `docs/demo-media.md` for provenance.
+
+- Public pricing now shows supported output settings and screenshot limits with an AI fidelity notice. Privacy pages link to the verified SeeAPI data-handling guide and Stripe policy.
+- Set `VITE_SUPPORT_EMAIL` to a monitored public mailbox and rebuild to enable pre-sales email contact without login. No admin account address is exposed by default.
+
+- Pricing uses separate English and Chinese search metadata, without changing the visible heading. Regenerate Paraglide messages with the normal build.
+- Pricing now distinguishes checking availability, config request failure (with retry), and confirmed purchase unavailability. Initial SSR markup no longer incorrectly declares that purchasing is closed. Payment configuration and settlement behavior are unchanged.
+
 ## 2026-11-03: Product branding
 
 - Replace the template favicon, logo, touch icon and social preview with the Screenshots to Video identity. Icon links include a version to refresh cached browser icons.

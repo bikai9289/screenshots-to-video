@@ -21,6 +21,7 @@ export const envConfigs: Record<string, string> = {
     publicEnv('VITE_APP_DESCRIPTION') ??
     'Turn product screenshots into demo and launch videos. Paid access required.',
   app_logo: publicEnv('VITE_APP_LOGO') ?? '/logo.png',
+  support_email: publicEnv('VITE_SUPPORT_EMAIL') ?? '',
 
   // Database
   database_url: procEnv.DATABASE_URL ?? '',

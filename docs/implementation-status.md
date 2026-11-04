@@ -1,5 +1,18 @@
 # 实现状态与继续验收
 
+## 2026-11-04: 本轮上线完善（本地已验证，待发布）
+
+- 已同步最新生产配置提交 `4c4f935`。Google OAuth、邮件、公开媒体域名及 GSC 配置以该生产快照为准；GA/Plausible 按用户选择继续跳过。
+- 截图维护已与 CLI 共用实现并接入 Worker scheduled；新版本地 runtime 定时端点返回 200，空库日志 `failed: 0`。尚未在生产执行恢复/删除验收。
+- 修复 Nitro 构建共享导出导致 Worker 启动失败：生成薄入口，仅对外导出 handler 与 Durable Object，保留内部模块共享导出。
+
+- 已同步远端 `9c72027`（环境变量优先与后台配置禁用）和 `7c34de6`（Workers `redirect: manual`）。
+- 双语定价页独立搜索元信息；购买状态区分加载中、不可用和请求失败，支持重试。
+- 定价页公开输出规格、上传限制和 AI 保真限制。售前邮箱使用 `VITE_SUPPORT_EMAIL`；隐私页补充官方政策链接。
+- 从站主账户已有成功任务取回五秒原始生成结果并加入首页；未新建任务或消耗制作次数。素材来源见 `demo-media.md`。
+- 81 项单元测试及 11 项浏览器检查通过，包含三种视口、真实视频播放、双语入口及请求隔离。
+- 出片和下载已有线上成功任务证据；正式 Stripe 收款模式、真实付费结算及 GSC 收录仍需单独核实，不由按钮可用或测试任务成功推断。
+
 日期：2026-11-03。目标仍是完成 `docs/` 中的完整开发与上线验证，不以首页完成代替整个项目完成。
 
 ## 已落地代码
@@ -60,7 +73,7 @@ Admin → Settings 面板已移除；SeeAPI / Stripe / R2 等密钥与启用开�
 ### MISSING / 待办
 
 - Stripe **Live** 密钥 + live webhook（正式收真钱前必换；当前仍是 Test）。
-- `screenshots:maintain` 迁入 Worker scheduled 或外部调度（当前仅 CLI）。
+- `screenshots:maintain` 已在本地接入 Worker scheduled，待发布并用受控数据验证恢复与删除。
 - GA / Plausible / AdSense（可选）。
 - Google OAuth 发布到 Production（离开 Testing）后再开放非测试用户。
 - GPT 公网抓取与增长验证（见 `growth-validation-plan.md`）。
