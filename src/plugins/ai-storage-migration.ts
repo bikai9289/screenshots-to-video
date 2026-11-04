@@ -9,7 +9,15 @@ export default definePlugin((nitroApp) => {
   nitroApp.hooks.hook(
     'cloudflare:scheduled',
     ({ context, env, controller }) => {
-      if (controller?.cron && controller.cron !== '0 16 * * *') return;
+      if (controller?.cron && controller.cron !== '0 16 * * *') {
+        const scheduled = new Date(controller.scheduledTime);
+        if (
+          controller.cron !== '*/5 * * * *' ||
+          scheduled.getUTCHours() !== 16 ||
+          scheduled.getUTCMinutes() !== 0
+        )
+          return;
+      }
       // Scheduled events can be the first event in an isolate: no HTTP entry
       // has initialized D1/R2 bindings yet.
       (globalThis as any).__CF_ENV__ = env;

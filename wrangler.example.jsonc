@@ -58,6 +58,6 @@
   // "kv_namespaces":  [{ "binding": "CACHE",  "id": "..." }],
   // "r2_buckets":     [{ "binding": "BUCKET", "bucket_name": "..." }],
   "triggers": {
-    "crons": ["*/5 * * * *", "0 16 * * *"], // Daily 00:00 UTC+8 (16:00 UTC) storage migration
+    "crons": ["*/5 * * * *"], // Payment checks; daily storage work is gated to 16:00 UTC.
   },
 }

@@ -66,6 +66,10 @@ describe('Worker scheduled screenshot maintenance', () => {
     });
     const pending: Promise<unknown>[] = [];
     scheduled({
+      controller: {
+        cron: '*/5 * * * *',
+        scheduledTime: Date.UTC(2026, 10, 4, 16, 0),
+      },
       env,
       context: {
         waitUntil: (promise: Promise<unknown>) => pending.push(promise),
