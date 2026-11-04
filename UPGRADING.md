@@ -1,5 +1,12 @@
 # Upgrading an existing project
 
+## 2026-11-04: Public contact, account entry and longer examples
+
+- Public headers expose Log in / My videos (also in the mobile menu) and the homepage states the supported 5/10/15-second durations. New 10- and 15-second generated examples replace the engineering sample, with source screenshots and honest labelling.
+- `/api/contact` accepts bounded, same-origin anonymous enquiries, with a honeypot and IP limits including the existing Durable Object limiter. Deployments need that binding. Enquiries are stored atomically in the existing admin ticket inbox under an API-type system account; no visitor account is registered and no schema migration is needed.
+- `VITE_SUPPORT_EMAIL` is the fixed notification destination. Resend uses the existing `RESEND_API_KEY` and `RESEND_SENDER_EMAIL`; request IDs deduplicate both storage and provider requests. Email failure retains the enquiry in the admin inbox. Replies can be sent to the validated visitor Reply-To address; no automatic email is sent to unverified visitor addresses.
+- Domain Email Routing for `support@screenshotstovideo.com` is configured separately from Resend sending; it forwards to the owner's verified Gmail. Application configuration and secrets remain environment-based.
+
 ## 2026-11-04: Cold Worker locale isolation
 
 - The server initializes Paraglide AsyncLocalStorage synchronously before accepting requests. This prevents concurrent cold requests from replacing each other's locale context and intermittently redirecting Chinese pages to English.

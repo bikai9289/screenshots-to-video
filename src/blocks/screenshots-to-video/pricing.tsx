@@ -9,10 +9,10 @@ import { getLocale, localizeHref } from '@/paraglide/runtime.js';
 import { usePublicConfig } from '@/hooks/use-public-config';
 import { ScreenshotPricing } from '@/components/screenshots-to-video/pricing';
 
-import { getScreenshotsCopy } from './content';
+import { useScreenshotsCopy } from './use-copy';
 
 export function ScreenshotsPricing() {
-  const copy = getScreenshotsCopy();
+  const copy = useScreenshotsCopy();
   const { data: session } = useSession();
   const configQuery = usePublicConfig();
   const configs = configQuery.data;

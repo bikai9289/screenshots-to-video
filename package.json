@@ -13,6 +13,7 @@
     "dev:setup": "node scripts/setup-local.mjs",
     "copy:sync": "node scripts/sync-screenshots-copy.mjs",
     "test:ui": "playwright test",
+    "test:public": "node --expose-gc scripts/test-public.mjs",
     "dev": "vite dev --port 3000",
     "prebuild": "node scripts/db-setup.mjs",
     "build": "vite build",

@@ -13,6 +13,7 @@ export interface EmailAttachment {
  * Email message interface
  */
 export interface EmailMessage {
+  idempotencyKey?: string;
   from?: string;
   to: string | string[];
   cc?: string | string[];

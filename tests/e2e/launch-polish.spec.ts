@@ -17,7 +17,7 @@ test('purchase specifications and provider policies are public in both languages
     ).toBeVisible();
     await page.goto(`${locale}/contact`);
     await expect(
-      page.locator('a[href="mailto:bikai9289@gmail.com"]')
+      page.locator('a[href="mailto:support@screenshotstovideo.com"]')
     ).toBeVisible();
   }
 });
@@ -31,9 +31,9 @@ test('real generated sample plays and is clearly identified', async ({
   await expect(page.locator('#real-output figcaption')).toContainText(
     'Test project, not customer work'
   );
-  await video.evaluate(async (element: HTMLVideoElement) => {
-    await element.play();
-  });
+  await page
+    .getByRole('button', { name: 'Play generated video 10s', exact: true })
+    .click();
   await expect
     .poll(() =>
       video.evaluate((element: HTMLVideoElement) => element.currentTime)
@@ -46,8 +46,18 @@ test('real generated sample plays and is clearly identified', async ({
   }));
   expect(metadata.width).toBe(1280);
   expect(metadata.height).toBe(720);
-  expect(metadata.duration).toBeGreaterThan(5);
-  expect(metadata.duration).toBeLessThan(5.2);
+  expect(metadata.duration).toBeGreaterThan(10);
+  expect(metadata.duration).toBeLessThan(10.2);
+  await page.getByRole('button', { name: '15s', exact: true }).click();
+  const longer = page.locator('#real-output video');
+  await page
+    .getByRole('button', { name: 'Play generated video 15s', exact: true })
+    .click();
+  await expect
+    .poll(() =>
+      longer.evaluate((element: HTMLVideoElement) => element.duration)
+    )
+    .toBeGreaterThan(15);
 });
 
 for (const width of [390, 768, 1440]) {

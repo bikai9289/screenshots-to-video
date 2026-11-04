@@ -1,7 +1,7 @@
 import { ScreenshotLanding } from '@/components/screenshots-to-video/landing';
 
-import { getScreenshotsCopy } from './content';
+import { useScreenshotsCopy } from './use-copy';
 
 export function ScreenshotsHome() {
-  return <ScreenshotLanding copy={getScreenshotsCopy()} />;
+  return <ScreenshotLanding copy={useScreenshotsCopy()} />;
 }

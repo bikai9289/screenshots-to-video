@@ -18,7 +18,7 @@ import {
   type StudioSettings,
 } from '@/components/screenshots-to-video/studio';
 
-import { getScreenshotsCopy } from './content';
+import { useScreenshotsCopy } from './use-copy';
 
 type Account = {
   remainingRenders: number;
@@ -37,7 +37,7 @@ const settingsSchema = z.object({
 });
 
 export function ScreenshotsStudio() {
-  const copy = getScreenshotsCopy();
+  const copy = useScreenshotsCopy();
   const { data: session, isPending } = useSession();
   const userId = session?.user.id;
   const queryClient = useQueryClient();

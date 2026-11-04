@@ -24,6 +24,7 @@ import {
 
 import { Link } from '@/core/i18n/navigation';
 
+import { RealDemo } from './real-demo';
 import type { ScreenshotsCopy } from './types';
 
 import './screenshots.css';
@@ -66,7 +67,13 @@ export function ScreenshotHeader({ copy }: { copy: ScreenshotsCopy }) {
         <Link href="/#examples">{copy.examplesNav}</Link>
         <Link href="/#how-it-works">{copy.howNav}</Link>
         <Link href="/pricing">{copy.pricingNav}</Link>
+        <Link className="mobile-account" href={copy.accountHref}>
+          {copy.accountLabel}
+        </Link>
       </nav>
+      <Link className="account-link" href={copy.accountHref}>
+        {copy.accountLabel}
+      </Link>
       <Link className="button dark nav-cta" href="/studio">
         {copy.create}
         <ArrowUpRight aria-hidden="true" />
@@ -458,6 +465,7 @@ export function ScreenshotLanding({ copy }: { copy: ScreenshotsCopy }) {
               <Sparkles aria-hidden="true" />
               {copy.heroNote}
             </p>
+            <p className="duration-note">{copy.durationOptions}</p>
           </div>
           <Film copy={copy} />
         </section>
@@ -570,38 +578,7 @@ export function ScreenshotLanding({ copy }: { copy: ScreenshotsCopy }) {
             ))}
           </div>
         </section>
-        <section className="verified-demo wrap section" id="real-output">
-          <div className="verified-demo-copy">
-            <p className="eyebrow">{copy.realDemoEyebrow}</p>
-            <h2>{copy.realDemoTitle}</h2>
-            <p>{copy.realDemoDescription}</p>
-            <span className="verified-demo-meta">5s · 16:9 · 720p MP4</span>
-            <Link className="inline-link" href="/pricing">
-              {copy.pricingNav}
-              <ArrowUpRight aria-hidden="true" />
-            </Link>
-          </div>
-          <figure>
-            <video
-              controls
-              playsInline
-              preload="none"
-              poster="/videos/screenshots-to-video/verified-demo-poster.png"
-              width="1280"
-              height="720"
-              aria-label={copy.realDemoTitle}
-            >
-              <source
-                src="/videos/screenshots-to-video/verified-demo.mp4"
-                type="video/mp4"
-              />
-              <a href="/videos/screenshots-to-video/verified-demo.mp4">
-                {copy.realDemoDownload}
-              </a>
-            </video>
-            <figcaption>{copy.realDemoCaption}</figcaption>
-          </figure>
-        </section>
+        <RealDemo copy={copy} />
         <section className="paid-section" id="paid-access">
           <div className="wrap paid-inner">
             <div>
