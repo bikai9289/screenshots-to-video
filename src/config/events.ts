@@ -35,6 +35,7 @@ export const userEvents = {
   paywall_hit: { tone: 'amber', client: true },
   // Server only: recordEvent({ userId, kind: 'risk_flagged', detail }).
   risk_flagged: { tone: 'red' },
+  payment_attempt_failed: { tone: 'red' },
 } satisfies Record<string, EventDefinition>;
 
 export type UserEventKind = keyof typeof userEvents;

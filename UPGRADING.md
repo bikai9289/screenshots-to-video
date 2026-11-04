@@ -288,3 +288,12 @@ grant_<orderNo>`, so the unique index allows one grant per order. Older
   `utm_source` filter (`users_sources` operation, `GET /api/admin/users/sources`,
   `users.read`). The subscriptions and credits list APIs now also return
   `userName` / `userImage`.
+
+# Payment status checks and reconciliation (2026-11-04)
+
+- No schema migration. Failed payment attempts use server-only `payment_attempt_failed` events in the existing user timeline, with deterministic IDs for replay protection. Only safe error codes are stored in the new attempt record, not card data or raw bank messages.
+- Keep the four Checkout events: `checkout.session.completed`, `checkout.session.expired`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`. They now have application handlers, not just Dashboard subscriptions. Add `payment_intent.payment_failed` to the same endpoint to record individual rejected attempts immediately. Otherwise polling can capture the latest failure only, not every intermediate attempt.
+- Restricted Stripe keys need Checkout Sessions read/list and PaymentIntents read for expanded error/status lookup, in addition to existing checkout/customer creation permissions. A permission/network error leaves orders unconfirmed and returns `PAYMENT_STATUS_UNAVAILABLE`; it never proves payment failure.
+- Add `*/5 * * * *` to Worker cron triggers, retaining `0 16 * * *`. Payment checks process up to 20 pending screenshot-pack orders per run; daily storage jobs ignore the five-minute trigger. Larger backlogs take multiple runs. Provider error rows rotate without being marked failed.
+- `/settings/payments` now shows payment-specific states and an owned-order check button. `POST /api/user/orders/check` accepts only `{orderNo}`, uses session ownership and IP/account limits, and does not create a charge. The original Checkout URL is only exposed to its owner, only for pending/retryable sessions and only on `https://checkout.stripe.com`.
+- Existing payment success/amount validation remains the settlement authority. Timeouts are unknown, a declined attempt is retryable while Checkout is open, and terminal expiry/async failure cannot downgrade an already paid order. Test-mode sessions left in production cannot be queried using a live key; they remain unconfirmed rather than being guessed failed.

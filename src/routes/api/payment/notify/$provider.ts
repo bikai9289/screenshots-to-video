@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { recordStripeAttempt } from '@/server/payment-reconciliation';
 
 import { isWebhookIgnored } from '@/core/payment/types';
 import {
@@ -35,6 +36,8 @@ export const Route = createFileRoute('/api/payment/notify/$provider')({
 
         try {
           const event = await handleWebhook({ req: request, provider });
+          if (provider === 'stripe')
+            await recordStripeAttempt(event.paymentSession);
 
           console.log(`Payment event [${provider}]: ${event.eventType}`);
 

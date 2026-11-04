@@ -25,6 +25,24 @@ afterEach(() => {
 });
 
 describe('Worker scheduled screenshot maintenance', () => {
+  it('does not run daily storage jobs on the payment polling trigger', () => {
+    let scheduled!: (event: unknown) => void;
+    (plugin as any)({
+      hooks: {
+        hook: (_name: string, callback: typeof scheduled) => {
+          scheduled = callback;
+        },
+      },
+    });
+    const waitUntil = vi.fn();
+    scheduled({
+      controller: { cron: '*/5 * * * *' },
+      env: {},
+      context: { waitUntil },
+    });
+    expect(waitUntil).not.toHaveBeenCalled();
+    expect(jobs.maintain).not.toHaveBeenCalled();
+  });
   it('initializes bindings without HTTP and runs despite a legacy job failure', async () => {
     vi.stubGlobal('__CF_ENV__', undefined);
     vi.spyOn(console, 'info').mockImplementation(() => {});

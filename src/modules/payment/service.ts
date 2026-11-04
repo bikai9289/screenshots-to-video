@@ -590,6 +590,61 @@ export async function handlePaymentCallback(orderNo: string) {
   }
 }
 
+/** Read provider truth for an owned order; callers handle auth/rate limits. */
+export async function refreshPaymentOrder(orderNo: string, userId?: string) {
+  const [existing] = await db()
+    .select()
+    .from(order)
+    .where(
+      and(
+        eq(order.orderNo, orderNo),
+        isNull(order.deletedAt),
+        userId ? eq(order.userId, userId) : undefined
+      )
+    )
+    .limit(1);
+  if (!existing) return null;
+  if (
+    existing.paymentProvider !== 'stripe' ||
+    !['created', 'pending'].includes(existing.status)
+  )
+    return { order: existing, session: null };
+  const pm = await getPaymentManager();
+  const provider = pm.getProvider('stripe');
+  if (!provider || !existing.paymentSessionId)
+    throw new Error('Payment provider unavailable');
+  const session = await provider.getPaymentSession({
+    sessionId: existing.paymentSessionId,
+  });
+  await handleCheckoutSuccess(session, 'stripe');
+  // Keep a safe status snapshot, not the expanded intent's card/customer data.
+  if (session.paymentStatus === PaymentStatus.PROCESSING) {
+    await db()
+      .update(order)
+      .set({
+        paymentResult: JSON.stringify({
+          id: existing.paymentSessionId,
+          status: session.paymentResult?.status,
+          payment_status: session.paymentResult?.payment_status,
+          checkedAt: new Date().toISOString(),
+          attempt: session.paymentAttempt,
+        }),
+      })
+      .where(
+        and(
+          eq(order.id, existing.id),
+          inArray(order.status, [OrderStatus.CREATED, OrderStatus.PENDING])
+        )
+      );
+  }
+  const [current] = await db()
+    .select()
+    .from(order)
+    .where(eq(order.id, existing.id))
+    .limit(1);
+  return { order: current || existing, session };
+}
+
 // --- Webhook handling ---
 
 export async function handleWebhook(params: {
@@ -834,7 +889,10 @@ export async function settleCheckoutOrder(
   const subscriptionInfo = session.subscriptionInfo;
   const [existingSubscription] = session.subscriptionId
     ? await db()
-        .select({ id: subscription.id, subscriptionNo: subscription.subscriptionNo })
+        .select({
+          id: subscription.id,
+          subscriptionNo: subscription.subscriptionNo,
+        })
         .from(subscription)
         .where(
           and(
@@ -844,8 +902,12 @@ export async function settleCheckoutOrder(
         )
         .limit(1)
     : [];
-  const subscriptionNo = current.subscriptionNo || existingSubscription?.subscriptionNo ||
-    (session.subscriptionId && subscriptionInfo ? `sub_${md5(`${provider}:${session.subscriptionId}`)}` : '');
+  const subscriptionNo =
+    current.subscriptionNo ||
+    existingSubscription?.subscriptionNo ||
+    (session.subscriptionId && subscriptionInfo
+      ? `sub_${md5(`${provider}:${session.subscriptionId}`)}`
+      : '');
   const grantAmount = Number(current.creditsAmount || 0);
   try {
     await atomic((q) => [
@@ -953,10 +1015,13 @@ export async function handleCheckoutSuccess(session: any, provider: string) {
   if (getScreenshotPack(existingOrder.productId)) {
     if (existingOrder.paymentProvider !== provider)
       throw new Error('Payment provider does not match order');
-    if (
-      ![OrderStatus.CREATED, OrderStatus.PENDING].includes(existingOrder.status)
-    )
-      return;
+    // Delivery order is not guaranteed. Verified paid truth may recover a
+    // previously failed checkout, but cannot reopen paid/refunding/refunded orders.
+    const settleable =
+      session.paymentStatus === PaymentStatus.SUCCESS && provider === 'stripe'
+        ? [OrderStatus.CREATED, OrderStatus.PENDING, OrderStatus.FAILED]
+        : [OrderStatus.CREATED, OrderStatus.PENDING];
+    if (!settleable.includes(existingOrder.status)) return;
     if (session.paymentStatus !== PaymentStatus.SUCCESS) {
       if (
         [PaymentStatus.FAILED, PaymentStatus.CANCELED].includes(
@@ -965,7 +1030,14 @@ export async function handleCheckoutSuccess(session: any, provider: string) {
       )
         await db()
           .update(order)
-          .set({ status: OrderStatus.FAILED })
+          .set({
+            status: OrderStatus.FAILED,
+            paymentResult: JSON.stringify({
+              id: sessionId,
+              status: session.paymentResult?.status,
+              payment_status: session.paymentResult?.payment_status,
+            }),
+          })
           .where(
             and(
               eq(order.id, existingOrder.id),
@@ -992,7 +1064,7 @@ export async function handleCheckoutSuccess(session: any, provider: string) {
           and(
             eq(order.id, existingOrder.id),
             eq(order.paymentProvider, provider),
-            inArray(order.status, [OrderStatus.CREATED, OrderStatus.PENDING])
+            inArray(order.status, settleable)
           )
         ),
       guard({

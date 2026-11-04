@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { publicPaymentStatus } from '@/server/payment-reconciliation';
 import { and, count, desc, eq, like, or, type SQL } from 'drizzle-orm';
 
 import { getAuth } from '@/core/auth';
@@ -58,6 +59,8 @@ async function GET({ request }: { request: Request }) {
         invoiceUrl: order.invoiceUrl,
         paidAt: order.paidAt,
         createdAt: order.createdAt,
+        paymentResult: order.paymentResult,
+        checkoutUrl: order.checkoutUrl,
       })
       .from(order)
       .where(where)
@@ -65,7 +68,36 @@ async function GET({ request }: { request: Request }) {
       .limit(pageSize)
       .offset(offset);
 
-    return respPage(rows, totalResult.count);
+    return respPage(
+      rows.map(
+        ({
+          paymentResult,
+          checkoutUrl,
+          ...row
+        }: {
+          paymentResult: string | null;
+          checkoutUrl: string | null;
+          status: string;
+          [key: string]: unknown;
+        }) => {
+          const summary = publicPaymentStatus({ ...row, paymentResult });
+          let resumeUrl: string | null = null;
+          try {
+            const url = new URL(checkoutUrl || '');
+            if (
+              url.protocol === 'https:' &&
+              url.hostname === 'checkout.stripe.com' &&
+              ['pending', 'retryable'].includes(summary.paymentState)
+            )
+              resumeUrl = url.href;
+          } catch {
+            /* No valid checkout URL. */
+          }
+          return { ...row, ...summary, resumeUrl };
+        }
+      ),
+      totalResult.count
+    );
   } catch (error: any) {
     return respErr(error.message || 'Internal error');
   }

@@ -294,7 +294,13 @@ export class StripeProvider implements PaymentProvider {
         throw new Error('sessionId is required');
       }
 
-      const session = await this.client.checkout.sessions.retrieve(sessionId);
+      const session = await this.client.checkout.sessions.retrieve(
+        sessionId,
+        {
+          expand: ['payment_intent'],
+        },
+        { timeout: 15_000, maxNetworkRetries: 0 }
+      );
 
       return await this.buildPaymentSessionFromCheckoutSession(session);
     } catch (error) {
@@ -332,10 +338,33 @@ export class StripeProvider implements PaymentProvider {
 
       const eventType = this.mapStripeEventType(event.type);
 
-      if (eventType === PaymentEventType.CHECKOUT_SUCCESS) {
+      if (event.type === 'payment_intent.payment_failed') {
+        const intent = event.data.object as Stripe.PaymentIntent;
+        const sessions = await this.client.checkout.sessions.list({
+          payment_intent: intent.id,
+          limit: 1,
+        });
+        if (sessions.data[0]) {
+          paymentSession = await this.buildPaymentSessionFromCheckoutSession({
+            ...sessions.data[0],
+            payment_intent: intent,
+          } as Stripe.Response<Stripe.Checkout.Session>);
+          // Some rejected attempts have no Charge ID. Preserve distinct signed events.
+          if (paymentSession.paymentAttempt?.id === intent.id)
+            paymentSession.paymentAttempt.id = event.id;
+        }
+      } else if (event.type.startsWith('checkout.session.')) {
         paymentSession = await this.buildPaymentSessionFromCheckoutSession(
           event.data.object as Stripe.Response<Stripe.Checkout.Session>
         );
+        if (event.type === 'checkout.session.async_payment_failed') {
+          paymentSession.paymentStatus = PaymentStatus.FAILED;
+          paymentSession.paymentAttempt = {
+            id: event.id,
+            code: 'async_payment_failed',
+            declineCode: '',
+          };
+        }
       } else if (eventType === PaymentEventType.PAYMENT_SUCCESS) {
         paymentSession = await this.buildPaymentSessionFromInvoice(
           event.data.object as Stripe.Response<Stripe.Invoice>
@@ -525,7 +554,12 @@ export class StripeProvider implements PaymentProvider {
   private mapStripeEventType(eventType: string): PaymentEventType {
     switch (eventType) {
       case 'checkout.session.completed':
+      case 'checkout.session.async_payment_succeeded':
+      case 'checkout.session.expired':
+      case 'checkout.session.async_payment_failed':
         return PaymentEventType.CHECKOUT_SUCCESS;
+      case 'payment_intent.payment_failed':
+        return PaymentEventType.PAYMENT_FAILED;
       case 'invoice.payment_succeeded':
         return PaymentEventType.PAYMENT_SUCCESS;
       case 'invoice.payment_failed':
@@ -648,6 +682,20 @@ export class StripeProvider implements PaymentProvider {
       paymentResult: session,
       metadata: session.metadata,
     };
+
+    const intent = session.payment_intent;
+    if (intent && typeof intent === 'object' && intent.last_payment_error) {
+      const error = intent.last_payment_error;
+      const safeCode = (value: unknown) =>
+        typeof value === 'string' && /^[a-z0-9_]{1,80}$/.test(value)
+          ? value
+          : '';
+      result.paymentAttempt = {
+        id: typeof error.charge === 'string' ? error.charge : intent.id,
+        code: safeCode(error.code) || 'payment_failed',
+        declineCode: safeCode(error.decline_code),
+      };
+    }
 
     if (subscription) {
       result.subscriptionId = subscription.id;

@@ -3434,5 +3434,21 @@
   "landing.screenshots.contactRateLimited": "Please wait before sending another message.",
   "landing.screenshots.demoSourceAlt": "Orbit sample analytics dashboard used as input for the generated videos",
   "landing.screenshots.demoSourceLabel": "View the source screenshot",
-  "landing.screenshots.playRealDemo": "Play generated video"
+  "landing.screenshots.playRealDemo": "Play generated video",
+  "settings.payments.check_title": "Payment status",
+  "settings.payments.check": "Check payment",
+  "settings.payments.check_error": "Unable to check right now. Wait a few seconds and try again. Your payment has not been marked failed.",
+  "settings.payments.attempt_failed": "The last payment attempt failed. You can retry in the original checkout.",
+  "settings.payments.status_help": "A closed payment page does not mean payment failed. Check the order before paying again. Pending orders are checked automatically; no additional charge is made.",
+  "settings.payments.state_pending": "Awaiting payment",
+  "settings.payments.state_processing": "Payment processing",
+  "settings.payments.state_retryable": "Payment can be retried",
+  "settings.payments.state_paid": "Paid",
+  "settings.payments.state_expired": "Checkout expired",
+  "settings.payments.state_failed": "Payment failed",
+  "settings.payments.state_refunding": "Refund processing",
+  "settings.payments.state_refunded": "Refunded",
+  "settings.payments.state_abnormal": "Needs review",
+  "admin.user_detail.timeline_payment_attempt_failed": "Payment attempt failed",
+  "settings.payments.resume": "Continue original checkout"
 }

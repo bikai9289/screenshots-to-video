@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { tDynamic } from '@/core/i18n/dynamic';
-import { apiGet, type PageResult } from '@/lib/api-client';
+import { apiGet, apiPost, type PageResult } from '@/lib/api-client';
 import { formatDateTime } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import { m } from '@/paraglide/messages.js';
 import { DataTable, type Column } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 type Order = {
@@ -25,6 +32,10 @@ type Order = {
   invoiceUrl?: string | null;
   paidAt?: string | null;
   createdAt: string;
+  paymentState?: string;
+  lastAttemptCode?: string | null;
+  checkedAt?: string | null;
+  resumeUrl?: string | null;
 };
 
 const TABS = ['all', 'one-time', 'subscription', 'renew'] as const;
@@ -50,6 +61,8 @@ function statusVariant(
 }
 
 function PaymentsPage() {
+  const queryClient = useQueryClient();
+  const [openedAt] = useState(Date.now);
   const [tab, setTab] = useState<Tab>('all');
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -76,6 +89,23 @@ function PaymentsPage() {
       return apiGet<PageResult<Order>>(`/api/user/orders?${params}`);
     },
     placeholderData: keepPreviousData,
+    refetchInterval: (query) =>
+      Date.now() - openedAt < 120_000 &&
+      query.state.data?.items.some((o) =>
+        ['created', 'pending'].includes(o.status)
+      )
+        ? 10_000
+        : false,
+  });
+  const check = useMutation({
+    mutationFn: (orderNo: string) =>
+      apiPost<{ paymentState: string }>('/api/user/orders/check', { orderNo }),
+    onSuccess: (data) => {
+      toast.success(tDynamic(`settings.payments.state_${data.paymentState}`));
+      queryClient.invalidateQueries({ queryKey: ['user-payments'] });
+      queryClient.invalidateQueries({ queryKey: ['screenshot-account'] });
+    },
+    onError: () => toast.error(m['settings.payments.check_error']()),
   });
   const orders = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
@@ -100,6 +130,19 @@ function PaymentsPage() {
     {
       header: m['settings.payments.status'](),
       cell: (o) => {
+        if (o.paymentProvider === 'stripe' && o.paymentState)
+          return (
+            <div className="space-y-1">
+              <Badge variant={statusVariant(o.status)}>
+                {tDynamic(`settings.payments.state_${o.paymentState}`)}
+              </Badge>
+              {o.paymentState === 'retryable' && (
+                <p className="text-muted-foreground max-w-52 text-xs">
+                  {m['settings.payments.attempt_failed']()}
+                </p>
+              )}
+            </div>
+          );
         const key = `admin.payments.status_${o.status}`;
         const label = tDynamic(key);
         return (
@@ -150,12 +193,57 @@ function PaymentsPage() {
     },
   ];
 
+  columns.push({
+    header: m['settings.payments.check_title'](),
+    cell: (o) =>
+      o.paymentProvider === 'stripe' &&
+      ['created', 'pending'].includes(o.status) ? (
+        <div className="space-y-1">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={check.isPending}
+            onClick={() => check.mutate(o.orderNo)}
+          >
+            <RefreshCw
+              className={cn(
+                'size-3.5',
+                check.isPending &&
+                  check.variables === o.orderNo &&
+                  'animate-spin'
+              )}
+            />
+            {m['settings.payments.check']()}
+          </Button>
+          {o.resumeUrl && (
+            <a
+              className="text-primary block text-xs underline underline-offset-4"
+              href={o.resumeUrl}
+              rel="noopener noreferrer"
+            >
+              {m['settings.payments.resume']()}
+            </a>
+          )}
+          {o.checkedAt && (
+            <p className="text-muted-foreground text-xs">
+              {formatDateTime(o.checkedAt)}
+            </p>
+          )}
+        </div>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      ),
+  });
+
   return (
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold">{m['settings.payments.title']()}</h1>
         <p className="text-muted-foreground">
           {m['settings.payments.description']()}
+        </p>
+        <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
+          {m['settings.payments.status_help']()}
         </p>
       </div>
 

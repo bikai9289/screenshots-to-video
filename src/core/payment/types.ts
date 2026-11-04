@@ -190,6 +190,8 @@ export interface CheckoutSession {
  */
 export interface PaymentSession {
   provider: string;
+  /** Safe provider error codes only; never raw messages or card details. */
+  paymentAttempt?: { id: string; code: string; declineCode: string };
 
   // payment info
   paymentStatus?: PaymentStatus; // payment status

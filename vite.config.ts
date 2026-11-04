@@ -112,7 +112,10 @@ export default defineConfig({
     }),
     viteReact(),
     nitro({
-      plugins: ['src/plugins/ai-storage-migration.ts'],
+      plugins: [
+        'src/plugins/ai-storage-migration.ts',
+        'src/plugins/payment-reconciliation.ts',
+      ],
     }),
   ],
 });
