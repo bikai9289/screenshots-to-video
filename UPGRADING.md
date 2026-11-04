@@ -1,5 +1,9 @@
 # Upgrading an existing project
 
+## 2026-11-04: Cold Worker locale isolation
+
+- The server initializes Paraglide AsyncLocalStorage synchronously before accepting requests. This prevents concurrent cold requests from replacing each other's locale context and intermittently redirecting Chinese pages to English.
+
 ## 2026-11-04: Cross-platform Cloudflare deploy
 
 - `pnpm cf:deploy` uses a Node runner rather than POSIX shell syntax, including env-file loading, the Cloudflare build, thin-entry finalization, and Wrangler deployment. It requires Node 22, matching the project environment. Secret values are never passed as command arguments.

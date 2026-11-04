@@ -1,3 +1,5 @@
+import './core/i18n/server-context';
+
 import handler from '@tanstack/react-start/server-entry';
 
 import { envConfigs } from './config';
