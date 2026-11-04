@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
@@ -12,6 +12,8 @@ import { ScreenshotContact } from '@/components/screenshots-to-video/contact';
 import { useScreenshotsCopy } from './use-copy';
 
 export function ScreenshotsContact() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
   const copy = useScreenshotsCopy();
   const email = envConfigs.support_email.trim();
   const supportEmail = /^[^\s@?#]+@[^\s@?#]+\.[^\s@?#]+$/.test(email)
@@ -97,7 +99,7 @@ export function ScreenshotsContact() {
               label={copy.contactName}
               autoComplete="name"
               required
-              disabled={mutation.isPending}
+              disabled={!ready || mutation.isPending}
             />
           )}
         </form.Field>
@@ -109,7 +111,7 @@ export function ScreenshotsContact() {
               type="email"
               autoComplete="email"
               required
-              disabled={mutation.isPending}
+              disabled={!ready || mutation.isPending}
             />
           )}
         </form.Field>
@@ -120,7 +122,7 @@ export function ScreenshotsContact() {
             field={field}
             label={copy.contactSubject}
             required
-            disabled={mutation.isPending}
+            disabled={!ready || mutation.isPending}
           />
         )}
       </form.Field>
@@ -138,7 +140,7 @@ export function ScreenshotsContact() {
               minLength={10}
               maxLength={4000}
               rows={6}
-              disabled={mutation.isPending}
+              disabled={!ready || mutation.isPending}
             />
           </div>
         )}
@@ -168,7 +170,7 @@ export function ScreenshotsContact() {
       <button
         className="button dark large"
         type="submit"
-        disabled={mutation.isPending}
+        disabled={!ready || mutation.isPending}
       >
         {mutation.isPending ? copy.contactSending : copy.contactSend}
         <span aria-hidden="true">↗</span>

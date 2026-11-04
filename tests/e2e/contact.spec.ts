@@ -1,5 +1,31 @@
 import { expect, test } from '@playwright/test';
 
+test('contact waits for hydration before accepting input', async ({ page }) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/*', async (route) => {
+    if (
+      route.request().resourceType() === 'script' &&
+      new URL(route.request().url()).pathname.startsWith('/assets/')
+    )
+      await gate;
+    await route.continue();
+  });
+  const navigation = page.goto('/contact', { waitUntil: 'domcontentloaded' });
+  try {
+    await expect(page.getByLabel('Your name', { exact: true })).toBeDisabled();
+    await expect(
+      page.getByRole('button', { name: 'Send message', exact: true })
+    ).toBeDisabled();
+  } finally {
+    release();
+  }
+  await navigation;
+  await expect(page.getByLabel('Your name', { exact: true })).toBeEnabled();
+});
+
 test('signed-in visitors see My videos instead of Log in', async ({ page }) => {
   await page.route('**/api/auth/get-session*', (route) =>
     route.fulfill({
