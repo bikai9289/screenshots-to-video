@@ -59,6 +59,7 @@ try {
       'tests/e2e/pricing.spec.ts',
       'tests/e2e/launch-polish.spec.ts',
       'tests/e2e/contact.spec.ts',
+      'tests/e2e/discovery.spec.ts',
     ],
     {
       env: { ...process.env, STV_BASE_URL: base },

@@ -1,5 +1,11 @@
 # Upgrading an existing project
 
+## 2026-11-04: Public product facts and crawler discovery
+
+- `llms.txt` and `llms-full.txt` now share current catalog facts and distinguish anonymous support from account-required generation. Full facts add original example links, billing, storage and limitations. These files do not guarantee AI search inclusion or recommendation.
+- Robots groups explicitly include OAI-SearchBot and Claude-SearchBot and consistently exclude localized private paths. Search crawlers can continue reading Studio's noindex tag; public training access remains allowed. Authentication remains the privacy boundary.
+- English and Chinese FAQ now state actual upload/output limits, preview behavior, failed-render handling and retention rather than deferring known facts to Studio.
+
 ## 2026-11-04: Public contact, account entry and longer examples
 
 - Contact inputs wait for hydration before becoming editable, preventing early typing from being lost on slower connections.
