@@ -62,7 +62,7 @@ export class SeeAPIClient {
         `https://api.seeapi.com/v1/generations${path}`,
         {
           ...init,
-          redirect: 'error',
+          redirect: 'manual',
           headers: {
             Authorization: `Bearer ${this.apiKey}`,
             'Content-Type': 'application/json',

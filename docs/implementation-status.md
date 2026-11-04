@@ -33,13 +33,36 @@
 
 Admin → Settings 面板已移除；SeeAPI / Stripe / R2 等密钥与启用开关**只通过环境变量或 `wrangler secret put` 配置**。`getAllConfigs()` 合并规则：非空 env 覆盖 DB，DB 不能覆盖已设置的 env。
 
-## 外部配置缺失
+## 生产配置快照（2026-11-04，Asia/Shanghai）
 
-整体目标状态：阻塞，未完成。相同缺失配置已在多轮实际检查中复现；不得用本地模拟替代真实支付、出片和生产上线证据。
+线上：`https://screenshotstovideo.com`（Worker `screenshots-to-video`，D1 + 双 R2 绑定）。
 
-本机实际检查：SeeAPI key、Stripe key/webhook secret、私有输入桶及 R2 凭据均未配置。已请求用户在 `.env.development` / wrangler secrets 填写，不在聊天中发送密钥；后台 Settings 已禁用。
+### DONE（核心截图→视频配置）
 
-配置完成后：验证 SeeAPI 账户模型权限、余额与真实出片；Stripe 测试模式支付、回调与退款；R2 私有访问和生命周期；再进行正式部署、GPT 公网抓取和独立问题测试。
+- Cloudflare OAuth 登录；自定义域名 apex + www 已绑 Worker。
+- Secrets（仅列名）：`AUTH_SECRET`、`CONFIG_ENCRYPTION_KEY`、`SEEAPI_API_KEY`、`R2_ACCESS_KEY`、`R2_SECRET_KEY`、`R2_ACCOUNT_ID`、`R2_ENDPOINT`、`R2_BUCKET_NAME`、`R2_UPLOAD_PATH`、`SCREENSHOTS_STORAGE_BUCKET`、`STORAGE_*` 别名、`STRIPE_SECRET_KEY`、`STRIPE_PUBLISHABLE_KEY`、`STRIPE_SIGNING_SECRET`。
+- Wrangler vars：`STRIPE_ENABLED=true`、`DATABASE_PROVIDER=d1`、`VITE_APP_URL=https://screenshotstovideo.com`、`AUTH_TRUSTED_ORIGINS`（www + workers.dev；apex 由 `VITE_APP_URL` 进入 trustedOrigins）。
+- `/api/config/public`：`stripe_enabled=true`、`screenshots_purchase_available=true`（表示 SeeAPI + 私有 R2 就绪判定已通过，且 Stripe secret 存在）。
+- Stripe **Test mode** webhook：`https://screenshotstovideo.com/api/payment/notify/stripe`（enabled）。
+- 截图商品目录在代码内（`screenshot_video_single/three/five`，$9.90/$19.90/$29.90），无需 D1 seed。
+- 超级管理员：`bikai9289@gmail.com` → `super_admin`。
+- Admin Settings UI 已禁用（`/admin/settings` 只读说明页）。
+
+### 说明（非阻塞）
+
+- `active_ai_provider=kie` 仅为模板 AI 图/视频页默认值；**截图→视频走 SeeAPI**（`src/core/ai/seeapi.ts`），与 kie 无关。
+- `R2_DOMAIN` / `STORAGE_PUBLIC_DOMAIN` 为空：私有截图用 S3 签名 URL，**核心出片不依赖公开域名**；公开桶仅服务模板通用媒体上传（头像等）。
+- Cron 维护任务因 Workers Free 触发器上限关闭（`triggers.crons=[]`）；需 Paid 或腾出名额后再开 `screenshots:maintain` 调度。
+- D1 `config` 表为空（全靠 env/secrets）；订单/截图任务计数目前为 0（尚未跑真实付费出片）。
+
+### MISSING / 待人工验收（阻塞「验收完成」而非阻塞配置）
+
+- 真实 Stripe **测试卡**购买 → 次数入账 → `/studio` 上传 → SeeAPI 出片 → 下载（端到端）。
+- SeeAPI 账户侧：模型权限与余额（本机 egress 可能被 Cloudflare 1010，以 Worker 出片为准）。
+- 维护脚本生产调度与真实恢复/删除验收。
+- Resend / 邮箱验证 / 密码重置（可选）。
+- 公开 R2 自定义域名（可选；绑域需 DNS，当前未设）。
+- GPT 公网抓取与增长验证（见 `growth-validation-plan.md`）。
 
 ## 未完成，不可略过
 
