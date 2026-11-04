@@ -39,29 +39,30 @@ Admin → Settings 面板已移除；SeeAPI / Stripe / R2 等密钥与启用开�
 
 ### DONE（核心截图→视频配置）
 
-- Cloudflare OAuth 登录；自定义域名 apex + www 已绑 Worker。
-- Secrets（仅列名）：`AUTH_SECRET`、`CONFIG_ENCRYPTION_KEY`、`SEEAPI_API_KEY`、`R2_ACCESS_KEY`、`R2_SECRET_KEY`、`R2_ACCOUNT_ID`、`R2_ENDPOINT`、`R2_BUCKET_NAME`、`R2_UPLOAD_PATH`、`SCREENSHOTS_STORAGE_BUCKET`、`STORAGE_*` 别名、`STRIPE_SECRET_KEY`、`STRIPE_PUBLISHABLE_KEY`、`STRIPE_SIGNING_SECRET`。
-- Wrangler vars：`STRIPE_ENABLED=true`、`DATABASE_PROVIDER=d1`、`VITE_APP_URL=https://screenshotstovideo.com`、`AUTH_TRUSTED_ORIGINS`（www + workers.dev；apex 由 `VITE_APP_URL` 进入 trustedOrigins）。
-- `/api/config/public`：`stripe_enabled=true`、`screenshots_purchase_available=true`（表示 SeeAPI + 私有 R2 就绪判定已通过，且 Stripe secret 存在）。
-- Stripe **Test mode** webhook：`https://screenshotstovideo.com/api/payment/notify/stripe`（enabled）。
-- 截图商品目录在代码内（`screenshot_video_single/three/five`，$9.90/$19.90/$29.90），无需 D1 seed。
-- 超级管理员：`bikai9289@gmail.com` → `super_admin`。
-- Admin Settings UI 已禁用（`/admin/settings` 只读说明页）。
+- 自定义域名 apex + www 已绑 Worker；邮箱密码登录可用。
+- Secrets（仅列名）：`AUTH_SECRET`、`CONFIG_ENCRYPTION_KEY`、`SEEAPI_API_KEY`、`R2_*` / `STORAGE_*`、`SCREENSHOTS_STORAGE_BUCKET`、`STRIPE_*`、`GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`、`RESEND_API_KEY`、`RESEND_SENDER_EMAIL`、`R2_DOMAIN`、`STORAGE_PUBLIC_DOMAIN`。
+- Wrangler vars：`STRIPE_ENABLED=true`、`DATABASE_PROVIDER=d1`、`VITE_APP_URL=https://screenshotstovideo.com`、`AUTH_TRUSTED_ORIGINS`、`EMAIL_VERIFICATION_ENABLED=true`、`GOOGLE_AUTH_ENABLED=true`。
+- Google OAuth（Testing）：consent 已配；测试用户 `bikai9289@gmail.com`；redirect 含 apex/www/workers.dev。
+- Resend 域名 `screenshotstovideo.com` 已 verified；`password_reset_enabled` / `email_verification_enabled` 均为 true。
+- 公开媒体域：`https://media.screenshotstovideo.com` → 桶 `screenshots-to-video-public`。
+- Cron：`0 16 * * *`（每日 00:00 Asia/Shanghai）已挂本 Worker（腾出 `genematicai-ai` 名额）；跑模板 AI 日更/超时清理，**不是** `pnpm screenshots:maintain`。
+- GSC 域名属性已验证；sitemap Success（约 10 页）；首页已请求编入索引。站内 GA/Plausible 未配（用户跳过）。
+- SeeAPI `redirect:'manual'` 修复已上线；Stripe Test 购买 + studio 出片 + 下载 E2E 已通过。
+- `/api/config/public`：`stripe_enabled=true`、`screenshots_purchase_available=true`、`google_auth_enabled=true`。
+- 截图商品目录在代码内（$9.90/$19.90/$29.90）；超级管理员 `bikai9289@gmail.com`；Admin Settings UI 已禁用。
 
 ### 说明（非阻塞）
 
-- `active_ai_provider=kie` 仅为模板 AI 图/视频页默认值；**截图→视频走 SeeAPI**（`src/core/ai/seeapi.ts`），与 kie 无关。
-- `R2_DOMAIN` / `STORAGE_PUBLIC_DOMAIN` 为空：私有截图用 S3 签名 URL，**核心出片不依赖公开域名**；公开桶仅服务模板通用媒体上传（头像等）。
-- Cron 维护任务因 Workers Free 触发器上限关闭（`triggers.crons=[]`）；需 Paid 或腾出名额后再开 `screenshots:maintain` 调度。
-- D1 `config` 表为空（全靠 env/secrets）；订单/截图任务计数目前为 0（尚未跑真实付费出片）。
+- `active_ai_provider=kie` 仅为模板 AI 图/视频页默认值；**截图→视频走 SeeAPI**。
+- 私有截图仍用签名 URL；公开域服务通用媒体上传。
+- D1 `config` 表为空（全靠 env/secrets）。`wrangler.jsonc` 为本地工作副本（gitignore），以线上 Worker vars/secrets 为准。
 
-### MISSING / 待人工验收（阻塞「验收完成」而非阻塞配置）
+### MISSING / 待办
 
-- 真实 Stripe **测试卡**购买 → 次数入账 → `/studio` 上传 → SeeAPI 出片 → 下载（端到端）。
-- SeeAPI 账户侧：模型权限与余额（本机 egress 可能被 Cloudflare 1010，以 Worker 出片为准）。
-- 维护脚本生产调度与真实恢复/删除验收。
-- Resend / 邮箱验证 / 密码重置（可选）。
-- 公开 R2 自定义域名（可选；绑域需 DNS，当前未设）。
+- Stripe **Live** 密钥 + live webhook（正式收真钱前必换；当前仍是 Test）。
+- `screenshots:maintain` 迁入 Worker scheduled 或外部调度（当前仅 CLI）。
+- GA / Plausible / AdSense（可选）。
+- Google OAuth 发布到 Production（离开 Testing）后再开放非测试用户。
 - GPT 公网抓取与增长验证（见 `growth-validation-plan.md`）。
 
 ## 未完成，不可略过
