@@ -106,6 +106,17 @@ export const envConfigs: Record<string, string> = {
   google_one_tap_enabled: procEnv.GOOGLE_ONE_TAP_ENABLED ?? '',
   github_auth_enabled: procEnv.GITHUB_AUTH_ENABLED ?? '',
 
+  // Google OAuth (server-only secret + client id used by auth / One Tap)
+  google_client_id: procEnv.GOOGLE_CLIENT_ID ?? '',
+  google_client_secret: procEnv.GOOGLE_CLIENT_SECRET ?? '',
+
+  // Analytics / ads / GSC (env wins over DB via getAllConfigs)
+  google_analytics_id: procEnv.GOOGLE_ANALYTICS_ID ?? '',
+  plausible_domain: procEnv.PLAUSIBLE_DOMAIN ?? '',
+  plausible_src: procEnv.PLAUSIBLE_SRC ?? '',
+  adsense_code: procEnv.ADSENSE_CODE ?? '',
+  google_site_verification: procEnv.GOOGLE_SITE_VERIFICATION ?? '',
+
   // Locale (public)
   locale: publicEnv('VITE_DEFAULT_LOCALE') ?? 'en',
 };

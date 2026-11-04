@@ -107,6 +107,7 @@ const getAnalyticsConfigs = createServerFn()
           : configs.plausible_domain?.trim() || '',
         plausibleSrc,
         adsenseCode: configs.adsense_code?.trim() || '',
+        googleSiteVerification: configs.google_site_verification?.trim() || '',
         crispWebsiteId:
           configs.crisp_enabled === 'true'
             ? configs.crisp_website_id?.trim() || ''
@@ -134,6 +135,7 @@ const getAnalyticsConfigs = createServerFn()
         plausibleDomain: '',
         plausibleSrc: '',
         adsenseCode: '',
+        googleSiteVerification: '',
         crispWebsiteId: '',
         tawkPropertyId: '',
         tawkWidgetId: '',
@@ -227,6 +229,14 @@ export const Route = createRootRoute({
         { name: 'twitter:title', content: appName },
         { name: 'twitter:description', content: appDescription },
         { name: 'twitter:image', content: `${appUrl}/og-image.png` },
+        ...(loaderData?.googleSiteVerification
+          ? [
+              {
+                name: 'google-site-verification',
+                content: loaderData.googleSiteVerification,
+              },
+            ]
+          : []),
       ],
       links: [
         { rel: 'icon', href: '/logo.svg?v=stv-1', type: 'image/svg+xml' },
