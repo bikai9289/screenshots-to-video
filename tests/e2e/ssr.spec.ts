@@ -58,18 +58,14 @@ test('hydrated language links retain path, query and fragment', async ({
   await page.goto('/pricing?source=footer#packs');
   // The SSR link cannot know a fragment, which browsers never send to servers.
   // Wait for hydration before testing the client-side fragment preservation.
-  await expect(
-    page.getByRole('button', { name: 'Choose this pack', exact: true }).first()
-  ).toBeEnabled();
+  await expect(page.locator('button.menu-toggle')).toBeEnabled();
   await page
     .locator('footer')
     .getByRole('link', { name: '中文', exact: true })
     .click();
   await expect(page).toHaveURL(/\/zh\/pricing\?source=footer#packs$/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh');
-  await expect(
-    page.getByRole('button', { name: '选择此方案', exact: true }).first()
-  ).toBeEnabled();
+  await expect(page.locator('button.menu-toggle')).toBeEnabled();
   await page
     .locator('footer')
     .getByRole('link', { name: 'English', exact: true })

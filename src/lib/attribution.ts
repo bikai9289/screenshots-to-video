@@ -31,7 +31,7 @@ const searchHosts = [
   'www.duckduckgo.com',
 ];
 const campaignValue = (value: string | null) =>
-  value && /^[a-zA-Z0-9_-]{1,64}$/.test(value) ? value : '';
+  value && /^[a-zA-Z0-9._-]{1,64}$/.test(value) ? value : '';
 
 export function classifyVisit(
   href: string,
@@ -52,18 +52,28 @@ export function classifyVisit(
   const utmSource = campaignValue(url.searchParams.get('utm_source'));
   const utmMedium = campaignValue(url.searchParams.get('utm_medium'));
   const utmCampaign = campaignValue(url.searchParams.get('utm_campaign'));
+  const aiReferrer = aiHosts.some(
+    (known) => host === known || host.endsWith(`.${known}`)
+  );
+  // Source tags are self-reported attribution, never proof of a recommendation.
+  // Exact matching prevents lookalike domains from becoming AI sources.
+  const aiSource = aiHosts.includes(utmSource.toLowerCase());
   const source: VisitSource =
     utmSource === 'internal_test'
       ? 'test'
-      : utmSource || utmMedium || utmCampaign
-        ? 'campaign'
-        : aiHosts.some((known) => host === known || host.endsWith(`.${known}`))
-          ? 'ai'
-          : searchHosts.includes(host)
-            ? 'search'
-            : host
-              ? 'referral'
-              : 'unknown';
+      : aiSource
+        ? 'ai'
+        : utmSource
+          ? 'campaign'
+          : aiReferrer
+            ? 'ai'
+            : utmMedium || utmCampaign
+              ? 'campaign'
+              : searchHosts.includes(host)
+                ? 'search'
+                : host
+                  ? 'referral'
+                  : 'unknown';
   // Only allow known public entry paths; private work identifiers never enter attribution.
   const path = [
     '/',

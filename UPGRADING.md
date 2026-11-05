@@ -1,5 +1,10 @@
 # Upgrading an existing project
 
+## 2026-11-05: AI referral attribution
+
+- Visit attribution retains dotted UTM values such as `chatgpt.com` and recognizes exact known AI source domains even without a referrer. Explicit non-AI campaign sources and `internal_test` retain precedence over referrers; campaign metadata alone no longer hides an AI referrer.
+- Anonymous visits still use the configured GA/Plausible integration for aggregate analytics. Product events remain authenticated; browser attribution is retained and reported once after login. UTM tags and referrers are attribution hints, not verified evidence of an AI recommendation. Existing stored events are not rewritten. No database or environment changes are needed.
+
 ## 2026-11-05: Public footer and sharing metadata
 
 - Footer language links now navigate directly to the other language of the current page, including query and fragment, and work without JavaScript. Legal links point directly to canonical paths; existing aliases remain available.
