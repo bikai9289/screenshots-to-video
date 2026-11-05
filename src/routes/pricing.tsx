@@ -28,6 +28,10 @@ export const Route = createFileRoute('/pricing')({
             content: `${envConfigs.app_name} pricing, screenshots to video, paid video packs`,
           },
           { property: 'og:type', content: 'website' },
+          {
+            property: 'og:url',
+            content: publicPageLinks('/pricing', loaderData.locale)[0].href,
+          },
           { property: 'og:title', content: loaderData.title },
           { property: 'og:description', content: loaderData.description },
           { name: 'twitter:card', content: 'summary_large_image' },

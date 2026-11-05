@@ -1,5 +1,10 @@
 # Upgrading an existing project
 
+## 2026-11-05: Public footer and sharing metadata
+
+- Footer language links now navigate directly to the other language of the current page, including query and fragment, and work without JavaScript. Legal links point directly to canonical paths; existing aliases remain available.
+- Pricing headings include the product name in both languages. Pricing, contact and static legal pages emit their canonical URL as `og:url`, including localized URLs and aliases. No database or environment changes are required.
+
 ## 2026-11-04: Public product facts and crawler discovery
 
 - `llms.txt` and `llms-full.txt` now share current catalog facts and distinguish anonymous support from account-required generation. Full facts add original example links, billing, storage and limitations. These files do not guarantee AI search inclusion or recommendation.

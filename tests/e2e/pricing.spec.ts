@@ -7,12 +7,12 @@ test('pricing has independent localized search metadata in initial HTML', async 
     [
       '/pricing',
       'Screenshots to Video Pricing | Packs from $9.90',
-      'A plan for your next launch.',
+      'Screenshots to video. Priced by the pack.',
     ],
     [
       '/zh/pricing',
       '截图转视频价格 | 一次性套餐低至 $9.90',
-      '为下一次发布，选个合适的方案。',
+      '截图转视频，按套餐付费。',
     ],
   ]) {
     const response = await request.get(path, { maxRedirects: 0 });

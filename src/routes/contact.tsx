@@ -19,6 +19,10 @@ export const Route = createFileRoute('/contact')({
       ? [
           { title: loaderData.title },
           { name: 'description', content: loaderData.description },
+          {
+            property: 'og:url',
+            content: publicPageLinks('/contact', loaderData.locale)[0].href,
+          },
         ]
       : [],
     links: loaderData ? publicPageLinks('/contact', loaderData.locale) : [],

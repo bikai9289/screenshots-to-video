@@ -54,6 +54,7 @@ export function staticPageRouteOptions(slug: string) {
         meta: [
           { title: meta.title },
           { name: 'description', content: meta.description },
+          { property: 'og:url', content: canonical },
         ],
         links: [{ rel: 'canonical', href: canonical }],
       };

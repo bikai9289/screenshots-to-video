@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useLocation } from '@tanstack/react-router';
 import {
   ArrowDownRight,
   ArrowUp,
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 
 import { Link } from '@/core/i18n/navigation';
+import { getLocale, localizeUrl } from '@/paraglide/runtime.js';
 
 import { RealDemo } from './real-demo';
 import type { ScreenshotsCopy } from './types';
@@ -93,6 +95,11 @@ export function ScreenshotHeader({ copy }: { copy: ScreenshotsCopy }) {
 }
 
 export function ScreenshotFooter({ copy }: { copy: ScreenshotsCopy }) {
+  const location = useLocation();
+  const languageUrl = localizeUrl(
+    new URL(location.href, 'https://locale.invalid'),
+    { locale: getLocale() === 'en' ? 'zh' : 'en' }
+  );
   return (
     <footer className="footer wrap">
       <ScreenshotBrand />
@@ -102,22 +109,21 @@ export function ScreenshotFooter({ copy }: { copy: ScreenshotsCopy }) {
         <ArrowUpRight aria-hidden="true" />
       </Link>
       <div className="footer-policies">
-        <Link href="/privacy">{copy.privacy}</Link>
-        <Link href="/terms">{copy.terms}</Link>
+        <Link href="/privacy-policy">{copy.privacy}</Link>
+        <Link href="/terms-of-service">{copy.terms}</Link>
         <Link href="/contact">{copy.contact}</Link>
-        <Link
-          href="/"
-          locale="en"
+        <a
+          href={languageUrl.pathname + languageUrl.search + languageUrl.hash}
           onClick={(event) => {
-            event.preventDefault();
-            void import('@/paraglide/runtime.js').then(
-              ({ setLocale, getLocale }) =>
-                setLocale(getLocale() === 'en' ? 'zh' : 'en')
-            );
+            // Fragments are unavailable during SSR and may precede hydration.
+            const target = localizeUrl(new URL(window.location.href), {
+              locale: getLocale() === 'en' ? 'zh' : 'en',
+            });
+            event.currentTarget.href = target.href;
           }}
         >
           {copy.language}
-        </Link>
+        </a>
       </div>
       <span>© {new Date().getFullYear()} Screenshots to Video</span>
     </footer>
