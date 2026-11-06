@@ -1,5 +1,15 @@
 # Upgrading an existing project
 
+## 2026-11-07: Tagged production releases
+
+- Deploy with `pnpm cf:deploy --release release/<version>` after committing changes and creating an annotated release tag on HEAD. The runner rejects missing tags, mismatched commits and dirty working trees, and checks again after building.
+- Cloudflare version metadata records the release tag and full Git commit. Production environment files and Worker secrets remain separate from Git tags. Push release tags to origin for shared recovery; never move an existing release tag.
+
+## 2026-11-07: Environment-configured social authentication
+
+- Authentication routes now use merged environment and database settings, so Google and GitHub credentials supplied through Worker secrets are registered correctly. Existing environment values retain precedence; no migration or new variables are required.
+- Sign-in and sign-up pages now display a localized failure message when social authentication fails instead of silently ignoring the error.
+
 ## 2026-11-05: AI referral attribution
 
 - Visit attribution retains dotted UTM values such as `chatgpt.com` and recognizes exact known AI source domains even without a referrer. Explicit non-AI campaign sources and `internal_test` retain precedence over referrers; campaign metadata alone no longer hides an AI referrer.

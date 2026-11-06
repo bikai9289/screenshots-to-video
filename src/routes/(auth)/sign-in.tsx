@@ -162,7 +162,16 @@ function SignInPage() {
   });
 
   async function handleSocial(provider: 'google' | 'github') {
-    await signIn.social({ provider, callbackURL: afterLoginUrl });
+    setError('');
+    try {
+      const result = await signIn.social({
+        provider,
+        callbackURL: afterLoginUrl,
+      });
+      if (result.error) setError(m['common.sign.sign_in_failed']());
+    } catch {
+      setError(m['common.sign.sign_in_failed']());
+    }
   }
 
   return (
