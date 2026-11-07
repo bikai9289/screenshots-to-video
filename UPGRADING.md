@@ -1,5 +1,11 @@
 # Upgrading an existing project
 
+## 2026-11-07: Scenario pages and search submission
+
+- Three bilingual scenario pages are linked from the footer, sitemap and public discovery files. App promotion does not promise App Store submission compliance. Pricing shows rounded per-render averages and attributed provider privacy facts; the paid model is unchanged.
+- Optional `BING_SITE_VERIFICATION` emits Bing's `msvalidate.01` meta tag. Set it only if using HTML verification. No schema changes are required.
+- Deploy the public IndexNow proof before running `node scripts/submit-indexnow.mjs --submit`; without the flag the script only previews the payload. See `docs/seo-rollout-2026-11-07.md` for remaining external setup and measurement.
+
 ## 2026-11-07: Tagged production releases
 
 - Deploy with `pnpm cf:deploy --release release/<version>` after committing changes and creating an annotated release tag on HEAD. The runner rejects missing tags, mismatched commits and dirty working trees, and checks again after building.

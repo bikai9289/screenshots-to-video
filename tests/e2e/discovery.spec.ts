@@ -1,5 +1,49 @@
 import { expect, test } from '@playwright/test';
 
+test('scenario pages are crawlable, localized and linked by sitemap', async ({
+  request,
+}) => {
+  const paths = [
+    '/screenshot-to-demo-video',
+    '/screenshot-to-app-store-preview-video',
+    '/feature-announcement-video',
+  ];
+  const sitemap = await (await request.get('/sitemap.xml')).text();
+  for (const path of paths) {
+    for (const prefix of ['', '/zh']) {
+      const url = prefix + path;
+      const response = await request.get(url, { maxRedirects: 0 });
+      expect(response.status()).toBe(200);
+      const html = await response.text();
+      expect(html).toMatch(/<h1>[^<]+<\/h1>/);
+      expect(html).not.toContain('landing.useCases.');
+      expect(html).not.toContain('????');
+      expect(html).toContain('rel="canonical"');
+      expect(html).toContain(`screenshotstovideo.com${url}`);
+      expect(html).toMatch(/hreflang="zh"/i);
+      expect(html).toContain('orbit-10s-20261104.mp4');
+      expect(html).toContain('href="' + prefix + '/pricing"');
+      expect(sitemap).toContain(`screenshotstovideo.com${url}`);
+    }
+  }
+  const appHtml = await (await request.get(paths[1])).text();
+  expect(appHtml).toContain('not a guaranteed App Store-ready preview');
+  expect(appHtml).toContain('developer.apple.com');
+});
+
+test('pricing averages and attributed privacy facts are present without JavaScript', async ({
+  request,
+}) => {
+  const html = (await (await request.get('/pricing')).text()).replace(
+    /<!--.*?-->/g,
+    ''
+  );
+  for (const amount of ['9.90', '6.63', '5.98'])
+    expect(html).toContain('$' + amount);
+  expect(html).toContain('SeeAPI states');
+  expect(html).toContain('no scheduled automatic expiry');
+});
+
 test('discovery files expose current public facts and a genuinely expanded version', async ({
   request,
 }) => {

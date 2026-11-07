@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { envConfigs } from '@/config';
+import { screenshotUseCases } from '@/config/screenshot-use-cases';
 import { locales, localizeUrl } from '@/paraglide/runtime.js';
 
 const paths = [
@@ -9,6 +10,7 @@ const paths = [
   '/contact',
   '/privacy-policy',
   '/terms-of-service',
+  ...screenshotUseCases.map(({ path }) => path),
 ];
 const escape = (value: string) =>
   value

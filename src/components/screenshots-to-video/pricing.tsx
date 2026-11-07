@@ -46,6 +46,10 @@ export function ScreenshotPricing({
                 ${(pack.priceInCents / 100).toFixed(2)}
               </p>
               <p className="pack-currency">{copy.oneTime}</p>
+              <p className="pack-unit-price">
+                ${(pack.priceInCents / 100 / pack.renders).toFixed(2)}{' '}
+                {copy.perRender}
+              </p>
               <h3>{counts[index]}</h3>
               <ul>
                 {[copy.packFailure, copy.packPreview, copy.packRights].map(
@@ -104,6 +108,21 @@ export function ScreenshotPricing({
           </dl>
         </section>
         <p className="pricing-small">{copy.packValidity}</p>
+        <section className="use-case-method privacy-summary">
+          <h2>{copy.beforeUpload}</h2>
+          <p>{copy.privacyProcessing}</p>
+          <p>{copy.privacyRetention}</p>
+          <p>{copy.privacyTraining}</p>
+          <Link className="inline-link" href="/privacy-policy">
+            {copy.privacy}
+          </Link>{' '}
+          <a
+            className="inline-link"
+            href="https://www.seeapi.com/docs/data-handling/"
+          >
+            {copy.privacyProvider}
+          </a>
+        </section>
         {availabilityStatus !== 'ready' || !available ? (
           <p role="status" className="pricing-small">
             {availabilityStatus === 'loading' ? (

@@ -3,6 +3,18 @@ import { m } from '@/paraglide/messages.js';
 
 export function getScreenshotsCopy() {
   return {
+    useCasesEyebrow: m['landing.screenshots.useCasesEyebrow'](),
+    relatedUses: m['landing.screenshots.relatedUses'](),
+    promptExample: m['landing.screenshots.promptExample'](),
+    beforeUpload: m['landing.screenshots.beforeUpload'](),
+    perRender: m['landing.screenshots.perRender'](),
+    privacyProcessing: m['landing.screenshots.privacyProcessing'](),
+    privacyRetention: m['landing.screenshots.privacyRetention'](),
+    privacyTraining: m['landing.screenshots.privacyTraining'](),
+    privacyProvider: m['landing.screenshots.privacyProvider'](),
+    useDemo: m['landing.screenshots.useDemo'](),
+    useApp: m['landing.screenshots.useApp'](),
+    useFeature: m['landing.screenshots.useFeature'](),
     playRealDemo: m['landing.screenshots.playRealDemo'](),
     demoSourceAlt: m['landing.screenshots.demoSourceAlt'](),
     demoSourceLabel: m['landing.screenshots.demoSourceLabel'](),

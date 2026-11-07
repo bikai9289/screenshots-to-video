@@ -117,6 +117,7 @@ export const envConfigs: Record<string, string> = {
   plausible_src: procEnv.PLAUSIBLE_SRC ?? '',
   adsense_code: procEnv.ADSENSE_CODE ?? '',
   google_site_verification: procEnv.GOOGLE_SITE_VERIFICATION ?? '',
+  bing_site_verification: procEnv.BING_SITE_VERIFICATION ?? '',
 
   // Locale (public)
   locale: publicEnv('VITE_DEFAULT_LOCALE') ?? 'en',

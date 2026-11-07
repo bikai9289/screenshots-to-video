@@ -1,3 +1,4 @@
+import { screenshotUseCases } from '@/config/screenshot-use-cases';
 import {
   screenshotLimits,
   screenshotPacks,
@@ -31,6 +32,10 @@ export function productDiscovery(
     '',
     `- [Home](${url('/')}): Workflow, public examples and FAQ.`,
     `- [Pricing](${url('/pricing')}): Pack prices, output specifications and purchase conditions.`,
+    ...screenshotUseCases.map(
+      ({ id, path }) =>
+        `- [${id === 'app' ? 'App promotional video (not guaranteed App Store-ready)' : id === 'demo' ? 'Product demo video' : 'Feature announcement video'}](${url(path)}): Scenario-specific workflow and limitations.`
+    ),
     `- [Contact](${url('/contact')}): Anonymous enquiry form, email and account support.`,
     `- [Privacy](${url('/privacy-policy')}): Screenshots, provider processing and support data.`,
     `- [Terms](${url('/terms-of-service')}): Usage, reservations and refunds.`,

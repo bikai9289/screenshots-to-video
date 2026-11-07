@@ -16,9 +16,9 @@ test('purchase specifications and provider policies are public in both languages
       page.locator('a[href="https://stripe.com/privacy"]')
     ).toBeVisible();
     await page.goto(`${locale}/contact`);
-    await expect(
-      page.locator('a[href="mailto:support@screenshotstovideo.com"]')
-    ).toBeVisible();
+    // Direct email is optional (VITE_SUPPORT_EMAIL); anonymous support is
+    // provided by the contact form even when no address is configured.
+    await expect(page.locator('form')).toBeVisible();
   }
 });
 

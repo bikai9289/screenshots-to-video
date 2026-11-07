@@ -244,7 +244,19 @@
     "contactAction": "Open account support",
     "contactHint": "Sign in to track your request and our reply.",
     "metaTitle": "Screenshots to Video | Product Demos & Launch Videos",
-    "metaDescription": "Turn product screenshots into demo and launch videos. Explore motion examples, plan your story, and show your product in action. Paid access required."
+    "metaDescription": "Turn product screenshots into demo and launch videos. Explore motion examples, plan your story, and show your product in action. Paid access required.",
+    "useCasesEyebrow": "Made for your next release",
+    "relatedUses": "More ways to use your screenshots",
+    "promptExample": "Example motion direction",
+    "beforeUpload": "Before you upload",
+    "perRender": "per render - rounded average",
+    "privacyProcessing": "Screenshots are stored in private object storage. Prompts, settings and time-limited screenshot links are sent to SeeAPI for generation.",
+    "privacyRetention": "Inputs cannot be used for new tasks after 24 hours; this does not mean every copy is deleted. SeeAPI currently lists no scheduled automatic expiry for stored input and output files. Request deletion through Contact.",
+    "privacyTraining": "SeeAPI states that it does not use API inputs or outputs to train AI models. Model providers have their own applicable terms.",
+    "privacyProvider": "Read SeeAPI's data-handling policy",
+    "useDemo": "Product demo videos",
+    "useApp": "App promotional videos",
+    "useFeature": "Feature announcement videos"
   },
   "zh": {
     "playRealDemo": "播放生成视频",
@@ -491,6 +503,18 @@
     "contactAction": "查看账户工单",
     "contactHint": "登录后可跟进你的请求和回复。",
     "metaTitle": "截图转视频 | 产品演示与发布视频",
-    "metaDescription": "将产品截图制作成演示和发布视频。查看动效示例，安排呈现顺序，让你的产品清楚、生动地登场。视频制作需要付费。"
+    "metaDescription": "将产品截图制作成演示和发布视频。查看动效示例，安排呈现顺序，让你的产品清楚、生动地登场。视频制作需要付费。",
+    "useCasesEyebrow": "为下一次产品发布准备",
+    "relatedUses": "截图的更多使用场景",
+    "promptExample": "镜头方向示例",
+    "beforeUpload": "上传前须知",
+    "perRender": "每次制作 · 四舍五入均价",
+    "privacyProcessing": "截图保存在私有对象存储中，提示词、设置和限时截图链接会发送给 SeeAPI 用于生成。",
+    "privacyRetention": "截图满 24 小时后不能用于新任务，不代表所有副本均已删除。SeeAPI 当前对存储的输入和输出文件不设计划自动过期，可通过联系页面申请删除。",
+    "privacyTraining": "SeeAPI 声明不使用 API 输入输出训练 AI 模型，底层模型服务商仍适用各自条款。",
+    "privacyProvider": "阅读 SeeAPI 数据处理规则",
+    "useDemo": "产品演示视频",
+    "useApp": "App 宣传视频",
+    "useFeature": "新功能公告视频"
   }
 }

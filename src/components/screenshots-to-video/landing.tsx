@@ -104,6 +104,11 @@ export function ScreenshotFooter({ copy }: { copy: ScreenshotsCopy }) {
     <footer className="footer wrap">
       <ScreenshotBrand />
       <p>{copy.footerTagline}</p>
+      <div className="use-case-links">
+        <Link href="/screenshot-to-demo-video">{copy.useDemo}</Link>
+        <Link href="/screenshot-to-app-store-preview-video">{copy.useApp}</Link>
+        <Link href="/feature-announcement-video">{copy.useFeature}</Link>
+      </div>
       <Link href="/#examples">
         {copy.explore}
         <ArrowUpRight aria-hidden="true" />

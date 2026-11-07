@@ -108,6 +108,7 @@ const getAnalyticsConfigs = createServerFn()
         plausibleSrc,
         adsenseCode: configs.adsense_code?.trim() || '',
         googleSiteVerification: configs.google_site_verification?.trim() || '',
+        bingSiteVerification: configs.bing_site_verification?.trim() || '',
         crispWebsiteId:
           configs.crisp_enabled === 'true'
             ? configs.crisp_website_id?.trim() || ''
@@ -234,6 +235,14 @@ export const Route = createRootRoute({
               {
                 name: 'google-site-verification',
                 content: loaderData.googleSiteVerification,
+              },
+            ]
+          : []),
+        ...(loaderData?.bingSiteVerification
+          ? [
+              {
+                name: 'msvalidate.01',
+                content: loaderData.bingSiteVerification,
               },
             ]
           : []),
