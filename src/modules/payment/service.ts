@@ -51,6 +51,7 @@ import {
   type UpdateSubscription,
 } from '@/modules/subscriptions/service';
 import { getSnowId, getUniSeq, getUuid, md5 } from '@/lib/hash';
+import { videoPackUsage } from '@/lib/screenshot-billing';
 
 import {
   grantOrderCreditsOnce,
@@ -1551,14 +1552,9 @@ export async function refundOrder(params: {
 
   if (getScreenshotPack(existingOrder.productId)) {
     const [usage] = await db()
-      .select({ total: count() })
-      .from(screenshotTask)
-      .where(
-        and(
-          eq(screenshotTask.orderId, existingOrder.id),
-          ne(screenshotTask.status, 'failed')
-        )
-      );
+      .select({ total: videoPackUsage(existingOrder.id) })
+      .from(order)
+      .where(eq(order.id, existingOrder.id));
     if (Number(usage.total) > 0)
       throw new Error(
         'This video pack has used or reserved renders and cannot be refunded automatically'
@@ -1606,7 +1602,7 @@ export async function refundOrder(params: {
         table: order,
         column: 'userId',
         where: eq(order.id, existingOrder.id),
-        require: sql`(select count(*) from ${screenshotTask} where ${screenshotTask.orderId} = ${existingOrder.id} and ${screenshotTask.status} <> 'failed') = 0`,
+        require: sql`${videoPackUsage(existingOrder.id)} = 0`,
         message: 'Video pack is in use',
       }),
     q

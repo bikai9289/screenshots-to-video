@@ -21,8 +21,12 @@ export function ScreenshotPricing({
   pending: string | null;
   onBuy: (productId: string) => void;
 }) {
-  const names = [copy.packSingle, copy.packLaunch, copy.packStudio];
-  const counts = [copy.packOne, copy.packThree, copy.packFive];
+  const names = [
+    copy.packEntry,
+    copy.packSingle,
+    copy.packLaunch,
+    copy.packStudio,
+  ];
   return (
     <div className="stv-site">
       <ScreenshotHeader copy={copy} />
@@ -46,11 +50,11 @@ export function ScreenshotPricing({
                 ${(pack.priceInCents / 100).toFixed(2)}
               </p>
               <p className="pack-currency">{copy.oneTime}</p>
-              <p className="pack-unit-price">
-                ${(pack.priceInCents / 100 / pack.renders).toFixed(2)}{' '}
-                {copy.perRender}
-              </p>
-              <h3>{counts[index]}</h3>
+              <h3>
+                {pack.credits}{' '}
+                {pack.credits === 1 ? copy.creditSingular : copy.creditPlural}
+              </h3>
+              <p>{copy.creditRule}</p>
               <ul>
                 {[copy.packFailure, copy.packPreview, copy.packRights].map(
                   (item) => (
@@ -65,8 +69,8 @@ export function ScreenshotPricing({
                 type="button"
                 className="button dark"
                 disabled={
-                  availabilityStatus !== 'ready' ||
-                  !available ||
+                  availabilityStatus === 'loading' ||
+                  (availabilityStatus === 'ready' && !available) ||
                   pending !== null
                 }
                 onClick={() => onBuy(pack.productId)}

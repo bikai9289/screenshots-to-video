@@ -8,7 +8,7 @@ import {
 import { screenshotLimits } from '@/config/screenshots-product';
 import { getAllConfigs } from '@/modules/config/service';
 import {
-  getRenderBalance,
+  getVideoBalance,
   listRenders,
   publicRender,
 } from '@/modules/screenshots/service';
@@ -21,9 +21,11 @@ export const Route = createFileRoute('/api/screenshots/account')({
         try {
           const session = await studioSession(request, 300);
           const config = await getAllConfigs();
+          const balance = await getVideoBalance(session.user.id);
           return respData(
             {
-              remainingRenders: await getRenderBalance(session.user.id),
+              ...balance,
+              remainingRenders: balance.legacyRenders,
               serviceAvailable: screenshotServiceReady(config),
               limits: screenshotLimits,
               tasks: (await listRenders(session.user.id)).map(publicRender),

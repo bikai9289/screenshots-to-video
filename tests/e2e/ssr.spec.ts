@@ -85,7 +85,7 @@ test('homepage can be read without JavaScript and has unique metadata', async ({
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
     await expect(page.locator('meta[name="description"]')).toHaveCount(1);
-    await expect(page.locator('details')).toHaveCount(11);
+    await expect(page.locator('details')).toHaveCount(12);
     await expect(page.locator('html')).toHaveAttribute(
       'lang',
       locale ? 'zh' : 'en'

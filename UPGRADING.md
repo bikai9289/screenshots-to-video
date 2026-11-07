@@ -1,5 +1,14 @@
 # Upgrading an existing project
 
+## 2026-11-07: Duration-based video credits (migration required)
+
+- Apply `drizzle/sqlite/0001_previous_anthem.sql` before deploying credit-aware code on D1/SQLite. It only adds `screenshot_credit_allocation` and its indexes; it does not rewrite historical orders or tasks. Review the SQL before production application. Development schema was synced using `db:push`. PostgreSQL/MySQL templates include the matching table; generate a migration for that dialect before upgrading those deployments.
+- New immutable product IDs sell $3.90/1, $9.90/3, $19.90/6, $29.90/10 video credits. The server catalog remains authoritative. Old screenshot product IDs cannot start new checkouts but still settle in-flight purchases and retain 1/3/5 legacy renders at any supported duration. Do not edit the entitlement counts attached to either generation of IDs.
+- Account responses add `remainingCredits` and `legacyRenders`; `remainingRenders` remains a legacy-only alias. Studio requires 1/2/3 video credits for 5/10/15 seconds. Legacy renders are consumed first. Video credits do not grant generic AI credits.
+- The public config endpoint caches filtered public results at the edge for 60 seconds. Database-check errors are HTTP 503/no-store, not cached false availability; the pricing UI allows checkout attempts while showing the unknown state. Checkout still validates the live server catalog and configuration.
+- Stripe currently uses dynamic `price_data`, so there are no fixed historical price IDs to archive. Versioned product IDs and server-generated `video_credits` metadata identify this change; metadata cannot grant rights. Existing payment/order idempotency stays in place.
+- Unknown submissions recover only with the exact same provider idempotency key/body. Confirmed failed tasks are not automatically restarted as a fresh generation. Never remove the allocation table during rollback. Once new packs have been purchased, roll forward or use a compatible credit-aware build; older code cannot service their balances.
+
 ## 2026-11-07: Scenario pages and search submission
 
 - Three bilingual scenario pages are linked from the footer, sitemap and public discovery files. App promotion does not promise App Store submission compliance. Pricing shows rounded per-render averages and attributed provider privacy facts; the paid model is unchanged.

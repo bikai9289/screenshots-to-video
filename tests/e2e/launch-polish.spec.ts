@@ -65,11 +65,24 @@ for (const width of [390, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     for (const path of ['/', '/pricing', '/contact', '/zh/pricing']) {
       await page.goto(path);
+      // Header's ready state is set after hydration; don't capture an SSR node
+      // while React may still replace it during the first client render.
+      await expect(page.locator('.menu-toggle')).toBeEnabled();
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth
         )
       ).toBe(true);
+      if (path.includes('/pricing')) {
+        await expect(page.locator('.pack')).toHaveCount(4);
+        const columns = await page
+          .locator('.pack-grid')
+          .evaluate(
+            (element) =>
+              getComputedStyle(element).gridTemplateColumns.split(' ').length
+          );
+        expect(columns).toBe(width > 1100 ? 4 : width > 650 ? 2 : 1);
+      }
       if (path === '/') {
         await page
           .locator('#real-output')

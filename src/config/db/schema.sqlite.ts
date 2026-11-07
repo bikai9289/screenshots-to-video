@@ -894,29 +894,65 @@ export type UserEvent = typeof userEvent.$inferSelect;
 export type NewUserEvent = typeof userEvent.$inferInsert;
 
 // Private screenshot inputs and paid, idempotent video render reservations.
-export const screenshotAsset = table('screenshot_asset', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(()=>user.id,{onDelete:'cascade'}),
-  objectKey: text('object_key').notNull(),
-  mimeType: text('mime_type').notNull(),
-  byteSize: integer('byte_size').notNull(),
-  width: integer('width').notNull(),
-  height: integer('height').notNull(),
-  createdAt: text('created_at').notNull(),
-  expiresAt: text('expires_at').notNull(),
-},t=>[index('idx_screenshot_asset_user').on(t.userId)]);
+export const screenshotAsset = table(
+  'screenshot_asset',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    objectKey: text('object_key').notNull(),
+    mimeType: text('mime_type').notNull(),
+    byteSize: integer('byte_size').notNull(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+    createdAt: text('created_at').notNull(),
+    expiresAt: text('expires_at').notNull(),
+  },
+  (t) => [index('idx_screenshot_asset_user').on(t.userId)]
+);
 
-export const screenshotTask = table('screenshot_task', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(()=>user.id,{onDelete:'cascade'}),
-  orderId: text('order_id').notNull().references(()=>order.id),
-  inputHash: text('input_hash').notNull(),
-  input: text('input').notNull(),
-  status: text('status').notNull(),
-  providerTaskId: text('provider_task_id'),
-  outputUrl: text('output_url'),
-  errorCode: text('error_code'),
-  leaseUntil: text('lease_until').notNull(),
-  createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull(),
-},t=>[index('idx_screenshot_task_order').on(t.orderId,t.status),index('idx_screenshot_task_user').on(t.userId,t.createdAt)]);
+export const screenshotTask = table(
+  'screenshot_task',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    orderId: text('order_id')
+      .notNull()
+      .references(() => order.id),
+    inputHash: text('input_hash').notNull(),
+    input: text('input').notNull(),
+    status: text('status').notNull(),
+    providerTaskId: text('provider_task_id'),
+    outputUrl: text('output_url'),
+    errorCode: text('error_code'),
+    leaseUntil: text('lease_until').notNull(),
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (t) => [
+    index('idx_screenshot_task_order').on(t.orderId, t.status),
+    index('idx_screenshot_task_user').on(t.userId, t.createdAt),
+  ]
+);
+
+// Credit allocations let one task combine multiple paid packs without altering legacy rights.
+export const screenshotCreditAllocation = table(
+  'screenshot_credit_allocation',
+  {
+    id: text('id').primaryKey(),
+    taskId: text('task_id')
+      .notNull()
+      .references(() => screenshotTask.id, { onDelete: 'cascade' }),
+    orderId: text('order_id')
+      .notNull()
+      .references(() => order.id),
+    credits: integer('credits').notNull(),
+  },
+  (t) => [
+    index('idx_screenshot_allocation_order').on(t.orderId),
+    index('idx_screenshot_allocation_task').on(t.taskId),
+  ]
+);

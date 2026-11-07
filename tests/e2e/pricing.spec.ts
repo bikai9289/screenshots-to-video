@@ -6,12 +6,12 @@ test('pricing has independent localized search metadata in initial HTML', async 
   for (const [path, title, heading] of [
     [
       '/pricing',
-      'Screenshots to Video Pricing | Packs from $9.90',
+      'Screenshots to Video Pricing | Packs from $3.90',
       'Screenshots to video. Priced by the pack.',
     ],
     [
       '/zh/pricing',
-      '截图转视频价格 | 一次性套餐低至 $9.90',
+      '截图转视频价格 | 一次性额度套餐低至 $3.90',
       '截图转视频，按套餐付费。',
     ],
   ]) {
@@ -80,7 +80,7 @@ test('pricing config errors show a recovery action rather than a closed shop', a
   await expect(
     page.getByRole('button', { name: 'Try again', exact: true })
   ).toBeVisible();
-  await expect(page.locator('.pack button').first()).toBeDisabled();
+  await expect(page.locator('.pack button').first()).toBeEnabled();
   await page.unroute('**/api/config/public');
   await page.route('**/api/config/public', (route) =>
     route.fulfill({

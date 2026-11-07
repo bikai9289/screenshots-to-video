@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import { Link } from '@/core/i18n/navigation';
+import { screenshotCreditCost } from '@/config/screenshots-product';
 import type { PublicScreenshotTask } from '@/lib/screenshots-contract';
 
 import { ScreenshotFooter, ScreenshotHeader } from './landing';
@@ -32,6 +33,7 @@ export interface StudioProps {
   signedIn: boolean;
   loading: boolean;
   balance: number;
+  legacyBalance: number;
   available: boolean;
   screens: StudioScreen[];
   settings: StudioSettings;
@@ -57,6 +59,7 @@ export function ScreenshotStudio(props: StudioProps) {
     signedIn,
     loading,
     balance,
+    legacyBalance,
     available,
     screens,
     settings,
@@ -80,6 +83,14 @@ export function ScreenshotStudio(props: StudioProps) {
             <div className="studio-balance">
               <span>{copy.balanceLabel}</span>
               <strong>{balance}</strong>
+              {legacyBalance > 0 && (
+                <span>
+                  {copy.legacyBalance.replace(
+                    '__COUNT__',
+                    String(legacyBalance)
+                  )}
+                </span>
+              )}
               <Link href="/pricing">
                 {copy.buyRenders}
                 <ArrowUpRight aria-hidden="true" />
@@ -109,7 +120,7 @@ export function ScreenshotStudio(props: StudioProps) {
                 {copy.studioUnavailable}
               </p>
             )}
-            {balance < 1 && !loading && (
+            {balance < 1 && legacyBalance < 1 && !loading && (
               <p className="studio-notice">
                 {copy.noRenders}{' '}
                 <Link href="/pricing">
@@ -233,8 +244,18 @@ export function ScreenshotStudio(props: StudioProps) {
                       }
                     >
                       {[5, 10, 15].map((duration) => (
-                        <option value={duration} key={duration}>
-                          {duration}s
+                        <option
+                          value={duration}
+                          key={duration}
+                          disabled={
+                            legacyBalance < 1 &&
+                            balance <
+                              screenshotCreditCost[duration as 5 | 10 | 15]
+                          }
+                        >
+                          {duration}s ·{' '}
+                          {screenshotCreditCost[duration as 5 | 10 | 15]}{' '}
+                          {copy.creditUnit}
                         </option>
                       ))}
                     </select>
@@ -265,7 +286,14 @@ export function ScreenshotStudio(props: StudioProps) {
                 </div>
                 <p className="studio-help">{copy.outputSettings}</p>
                 <p className="studio-help">{copy.reviewNotice}</p>
-                <p className="studio-charge">{copy.confirmCharge}</p>
+                <p className="studio-charge">
+                  {legacyBalance > 0
+                    ? copy.legacyCharge
+                    : copy.confirmCharge.replace(
+                        '__COUNT__',
+                        String(screenshotCreditCost[settings.duration])
+                      )}
+                </p>
                 {error && (
                   <p className="studio-error" role="alert">
                     {error}
@@ -279,7 +307,9 @@ export function ScreenshotStudio(props: StudioProps) {
                     loading ||
                     !available ||
                     (!props.pendingSubmission &&
-                      (balance < 1 || screens.length === 0))
+                      ((legacyBalance < 1 &&
+                        balance < screenshotCreditCost[settings.duration]) ||
+                        screens.length === 0))
                   }
                 >
                   {busy ? (

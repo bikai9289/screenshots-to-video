@@ -18,7 +18,7 @@ test('public content and FAQ answers exist in the initial HTML in both languages
     expect(html).toContain(title);
     expect(html).toContain(question);
     expect(html).toContain(answer);
-    expect(html.match(/<details/g)?.length).toBe(11);
+    expect(html.match(/<details/g)?.length).toBe(12);
     expect(html).not.toContain('"price":"0"');
     expect(html).not.toContain('user-scalable=no');
   }

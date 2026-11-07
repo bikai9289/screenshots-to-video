@@ -14,11 +14,19 @@ import {
 import type { SeeAPIInput, SeeAPIResult } from '@/core/ai/seeapi';
 import { db } from '@/core/db';
 import { atomic, AtomicGuardError, guard } from '@/core/db/atomic';
-import { order, screenshotAsset, screenshotTask } from '@/config/db/schema';
+import {
+  order,
+  screenshotAsset,
+  screenshotCreditAllocation,
+  screenshotTask,
+} from '@/config/db/schema';
 import {
   getScreenshotPack,
+  legacyScreenshotPacks,
+  screenshotCreditCost,
   screenshotPacks,
 } from '@/config/screenshots-product';
+import { allocatedVideoCredits } from '@/lib/screenshot-billing';
 import {
   StudioError,
   type PublicScreenshotTask,
@@ -44,7 +52,9 @@ const paidConditions = (userId: string) =>
     gt(order.paymentAmount, 0),
     inArray(
       order.productId,
-      screenshotPacks.map((pack) => pack.productId)
+      [...screenshotPacks, ...legacyScreenshotPacks].map(
+        (pack) => pack.productId
+      )
     )
   );
 
@@ -53,7 +63,7 @@ async function paidOrders(userId: string) {
     .select()
     .from(order)
     .where(paidConditions(userId))
-    .orderBy(order.createdAt);
+    .orderBy(order.createdAt, order.id);
 }
 async function usedRenders(orderId: string) {
   const [row] = await db()
@@ -69,15 +79,37 @@ async function usedRenders(orderId: string) {
 }
 
 export async function getRenderBalance(userId: string) {
+  const balance = await getVideoBalance(userId);
+  // Compatibility for upload authorization: either kind grants access to input storage.
+  return balance.remainingCredits + balance.legacyRenders;
+}
+
+async function usedCredits(orderId: string) {
+  const [row] = await db()
+    .select({ total: allocatedVideoCredits(orderId) })
+    .from(order)
+    .where(eq(order.id, orderId));
+  return Number(row?.total ?? 0);
+}
+
+export async function getVideoBalance(userId: string) {
   const purchases = await paidOrders(userId);
-  let balance = 0;
-  for (const purchase of purchases)
-    balance += Math.max(
-      0,
-      getScreenshotPack(purchase.productId)!.renders -
-        (await usedRenders(purchase.id))
-    );
-  return balance;
+  let remainingCredits = 0;
+  let legacyRenders = 0;
+  for (const purchase of purchases) {
+    const pack = getScreenshotPack(purchase.productId)!;
+    if (pack.legacy)
+      legacyRenders += Math.max(
+        0,
+        pack.renders - (await usedRenders(purchase.id))
+      );
+    else
+      remainingCredits += Math.max(
+        0,
+        pack.credits - (await usedCredits(purchase.id))
+      );
+  }
+  return { remainingCredits, legacyRenders };
 }
 
 export async function findRender(userId: string, id: string) {
@@ -147,6 +179,7 @@ export async function reserveRender({
   };
   for (const purchase of purchases) {
     const pack = getScreenshotPack(purchase.productId)!;
+    if (!pack.legacy) continue;
     if ((await usedRenders(purchase.id)) >= pack.renders) continue;
     const row = {
       id,
@@ -202,7 +235,93 @@ export async function reserveRender({
       if (!(error instanceof AtomicGuardError)) throw error;
     }
   }
-  throw new StudioError('PAID_ACCESS_REQUIRED');
+  // A long video may combine credits from multiple packs. Guard all contributing
+  // orders and insert all allocations in one atomic batch, including on D1.
+  const needed = screenshotCreditCost[request.duration];
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const allocations: {
+      orderId: string;
+      credits: number;
+      capacity: number;
+    }[] = [];
+    let remaining = needed as number;
+    for (const purchase of await paidOrders(userId)) {
+      const pack = getScreenshotPack(purchase.productId)!;
+      if (pack.legacy) continue;
+      const credits = Math.min(
+        remaining,
+        Math.max(0, pack.credits - (await usedCredits(purchase.id)))
+      );
+      if (credits)
+        allocations.push({
+          orderId: purchase.id,
+          credits,
+          capacity: pack.credits,
+        });
+      remaining -= credits;
+      if (!remaining) break;
+    }
+    if (remaining) throw new StudioError('INSUFFICIENT_CREDITS');
+    const row = {
+      id,
+      userId,
+      orderId: allocations[0].orderId,
+      inputHash,
+      input: JSON.stringify({ ...input, billing: { credits: needed } }),
+      status: 'reserved',
+      leaseUntil: '1970-01-01T00:00:00.000Z',
+      createdAt: now,
+      updatedAt: now,
+    };
+    try {
+      await atomic((q) => [
+        ...allocations.map((allocation) =>
+          guard({
+            table: order,
+            column: 'userId',
+            where: eq(order.id, allocation.orderId),
+            require: and(
+              eq(order.userId, userId),
+              eq(order.status, 'paid'),
+              isNull(order.deletedAt),
+              gt(order.paymentAmount, 0),
+              sql`${allocatedVideoCredits(allocation.orderId)} + ${allocation.credits} <= ${allocation.capacity}`
+            )!,
+            message: 'Video credit balance changed',
+          })
+        ),
+        q.insert(screenshotTask).values(row),
+        ...allocations.map((allocation) =>
+          q.insert(screenshotCreditAllocation).values({
+            id: `${id}_${allocation.orderId}`,
+            taskId: id,
+            orderId: allocation.orderId,
+            credits: allocation.credits,
+          })
+        ),
+      ]);
+      return {
+        ...row,
+        providerTaskId: null,
+        outputUrl: null,
+        errorCode: null,
+        requestKey: request.idempotencyKey,
+      };
+    } catch (error) {
+      const [replay] = await db()
+        .select()
+        .from(screenshotTask)
+        .where(eq(screenshotTask.id, id))
+        .limit(1);
+      if (replay) {
+        if (replay.userId !== userId || replay.inputHash !== inputHash)
+          throw new StudioError('IDEMPOTENCY_CONFLICT');
+        return { ...replay, requestKey: request.idempotencyKey };
+      }
+      if (!(error instanceof AtomicGuardError)) throw error;
+    }
+  }
+  throw new StudioError('INSUFFICIENT_CREDITS');
 }
 
 export async function claimSubmission(userId: string, id: string) {

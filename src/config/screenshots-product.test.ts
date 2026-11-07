@@ -4,13 +4,14 @@ import { getPricingProduct } from './pricing';
 import { getScreenshotPack, screenshotPacks } from './screenshots-product';
 
 describe('paid screenshot video packs', () => {
-  it('matches the approved amounts and render counts', () => {
+  it('matches the approved amounts and credit balances', () => {
     expect(
-      screenshotPacks.map((pack) => [pack.priceInCents, pack.renders])
+      screenshotPacks.map((pack) => [pack.priceInCents, pack.credits])
     ).toEqual([
-      [990, 1],
-      [1990, 3],
-      [2990, 5],
+      [390, 1],
+      [990, 3],
+      [1990, 6],
+      [2990, 10],
     ]);
   });
   it('does not grant generic AI credits or accept legacy products', () => {

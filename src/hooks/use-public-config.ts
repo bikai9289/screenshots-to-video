@@ -19,7 +19,7 @@ export function usePublicConfig() {
     queryKey: ['public-config'],
     queryFn: () =>
       apiGet<PublicConfig>('/api/config/public', { cache: 'no-store' }),
-    staleTime: 0,
+    staleTime: 60_000,
     enabled: typeof window !== 'undefined',
   });
 }

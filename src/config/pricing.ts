@@ -9,7 +9,8 @@
  */
 
 import { PaymentInterval, PaymentType } from '@/core/payment/types';
-import { screenshotPacks } from './screenshots-product';
+
+import { legacyScreenshotPacks, screenshotPacks } from './screenshots-product';
 
 export type PricingPlanInfo = {
   name: string;
@@ -42,17 +43,24 @@ export type PricingProduct = {
  * Keys MUST match what the pricing UI sends as product_id.
  */
 export const pricingCatalog: Record<string, PricingProduct> = {
-  ...Object.fromEntries(screenshotPacks.map(pack=>[pack.productId,{
-    productId:pack.productId,
-    productName:`Screenshots to Video ${pack.name}`,
-    planName:pack.name,
-    description:`${pack.renders} screenshot video render${pack.renders===1?'':'s'}`,
-    type:PaymentType.ONE_TIME,
-    priceInCents:pack.priceInCents,
-    currency:'usd',
-    // Render rights come from paid orders, not the template's gift-credit balance.
-    credits:0,
-  }])),
+  ...Object.fromEntries(
+    [...screenshotPacks, ...legacyScreenshotPacks].map((pack) => [
+      pack.productId,
+      {
+        productId: pack.productId,
+        productName: `Screenshots to Video ${pack.name}`,
+        planName: pack.name,
+        description: pack.legacy
+          ? `${pack.renders} screenshot video renders (legacy)`
+          : `${pack.credits} video credits (1 credit per 5 seconds)`,
+        type: PaymentType.ONE_TIME,
+        priceInCents: pack.priceInCents,
+        currency: 'usd',
+        // Render rights come from paid orders, not the template's gift-credit balance.
+        credits: 0,
+      },
+    ])
+  ),
   starter_monthly: {
     productId: 'starter_monthly',
     productName: 'Starter',

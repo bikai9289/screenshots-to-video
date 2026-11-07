@@ -634,7 +634,7 @@ export function ScreenshotLanding({ copy }: { copy: ScreenshotsCopy }) {
             </h2>
           </div>
           <div className="faq-list">
-            {Array.from({ length: 11 }, (_, index) => index + 1).map(
+            {Array.from({ length: 12 }, (_, index) => index + 1).map(
               (index) => (
                 <details key={index}>
                   <summary>

@@ -27,7 +27,7 @@ export const studioErrors = {
   PAID_ACCESS_REQUIRED: {
     code: 4103,
     status: 402,
-    message: 'Purchase video renders to continue.',
+    message: 'Purchase video credits to continue.',
   },
   NOT_FOUND: {
     code: 4104,
@@ -73,7 +73,8 @@ export const studioErrors = {
   GENERATION_FAILED: {
     code: 4112,
     status: 422,
-    message: 'Generation failed. Your render has been returned.',
+    message:
+      'Generation failed. Your reserved credits or legacy render have been returned.',
   },
   PROVIDER_RETRY: {
     code: 4113,
@@ -85,6 +86,12 @@ export const studioErrors = {
     code: 4114,
     status: 500,
     message: 'We could not complete the request. Please try again.',
+  },
+  INSUFFICIENT_CREDITS: {
+    code: 4115,
+    status: 402,
+    message:
+      'Not enough credits for this duration. Choose a shorter video or buy credits.',
   },
 } as const;
 export type StudioErrorKey = keyof typeof studioErrors;

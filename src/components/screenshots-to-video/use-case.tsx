@@ -55,7 +55,7 @@ export function ScreenshotUseCasePage({
               <dt>{copy.pricingNav}</dt>
               <dd>
                 ${(screenshotPacks[0].priceInCents / 100).toFixed(2)} /{' '}
-                {copy.packOne}. {copy.oneTime}
+                {copy.entryCredit}. {copy.oneTime}
               </dd>
             </div>
           </dl>

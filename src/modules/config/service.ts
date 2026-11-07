@@ -20,7 +20,9 @@ let warnedNoDatabase = false;
 /**
  * Get all configs from database.
  */
-export async function getDbConfigs(): Promise<ConfigMap> {
+export async function getDbConfigs(options?: {
+  throwOnError?: boolean;
+}): Promise<ConfigMap> {
   const now = Date.now();
   if (cachedConfigs && now - cacheTime < CACHE_TTL) {
     return cachedConfigs;
@@ -61,6 +63,8 @@ export async function getDbConfigs(): Promise<ConfigMap> {
     return result;
   } catch (error) {
     console.error('[config] failed to load db configs', error);
+    if (options?.throwOnError)
+      throw new Error('Configuration check unavailable');
     return {};
   }
 }
@@ -82,8 +86,10 @@ export function pickNonEmptyEnvConfigs(env: ConfigMap = envConfigs): ConfigMap {
 /**
  * Get all configs merged: database first, then non-empty env (env wins).
  */
-export async function getAllConfigs(): Promise<ConfigMap> {
-  const dbConfigs = await getDbConfigs();
+export async function getAllConfigs(options?: {
+  throwOnError?: boolean;
+}): Promise<ConfigMap> {
+  const dbConfigs = await getDbConfigs(options);
   // Env always wins when set — secrets/providers come from wrangler secrets / .env only.
   return { ...dbConfigs, ...pickNonEmptyEnvConfigs(envConfigs) };
 }

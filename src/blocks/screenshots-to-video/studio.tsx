@@ -21,7 +21,9 @@ import {
 import { useScreenshotsCopy } from './use-copy';
 
 type Account = {
-  remainingRenders: number;
+  remainingCredits: number;
+  legacyRenders: number;
+  remainingRenders?: number;
   serviceAvailable: boolean;
   tasks: PublicScreenshotTask[];
 };
@@ -304,7 +306,10 @@ export function ScreenshotsStudio() {
           loading={
             isPending || (!!userId && (!draftReady || account.isPending))
           }
-          balance={account.data?.remainingRenders ?? 0}
+          balance={account.data?.remainingCredits ?? 0}
+          legacyBalance={
+            account.data?.legacyRenders ?? account.data?.remainingRenders ?? 0
+          }
           available={account.data?.serviceAvailable ?? false}
           screens={screens}
           settings={settings}

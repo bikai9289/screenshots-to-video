@@ -735,29 +735,65 @@ export const userEvent = table(
 export type UserEvent = typeof userEvent.$inferSelect;
 export type NewUserEvent = typeof userEvent.$inferInsert;
 
-export const screenshotAsset = table('screenshot_asset', {
-  id: varchar191('id').primaryKey(),
-  userId: varchar191('user_id').notNull().references(()=>user.id,{onDelete:'cascade'}),
-  objectKey: text('object_key').notNull(),
-  mimeType: varchar191('mime_type').notNull(),
-  byteSize: int('byte_size').notNull(),
-  width: int('width').notNull(),
-  height: int('height').notNull(),
-  createdAt: varchar191('created_at').notNull(),
-  expiresAt: varchar191('expires_at').notNull(),
-},t=>[index('idx_screenshot_asset_user').on(t.userId)]);
+export const screenshotAsset = table(
+  'screenshot_asset',
+  {
+    id: varchar191('id').primaryKey(),
+    userId: varchar191('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    objectKey: text('object_key').notNull(),
+    mimeType: varchar191('mime_type').notNull(),
+    byteSize: int('byte_size').notNull(),
+    width: int('width').notNull(),
+    height: int('height').notNull(),
+    createdAt: varchar191('created_at').notNull(),
+    expiresAt: varchar191('expires_at').notNull(),
+  },
+  (t) => [index('idx_screenshot_asset_user').on(t.userId)]
+);
 
-export const screenshotTask = table('screenshot_task', {
-  id: varchar191('id').primaryKey(),
-  userId: varchar191('user_id').notNull().references(()=>user.id,{onDelete:'cascade'}),
-  orderId: varchar191('order_id').notNull().references(()=>order.id),
-  inputHash: varchar191('input_hash').notNull(),
-  input: longtext('input').notNull(),
-  status: varchar191('status').notNull(),
-  providerTaskId: varchar191('provider_task_id'),
-  outputUrl: text('output_url'),
-  errorCode: varchar191('error_code'),
-  leaseUntil: varchar191('lease_until').notNull(),
-  createdAt: varchar191('created_at').notNull(),
-  updatedAt: varchar191('updated_at').notNull(),
-},t=>[index('idx_screenshot_task_order').on(t.orderId,t.status),index('idx_screenshot_task_user').on(t.userId,t.createdAt)]);
+export const screenshotTask = table(
+  'screenshot_task',
+  {
+    id: varchar191('id').primaryKey(),
+    userId: varchar191('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    orderId: varchar191('order_id')
+      .notNull()
+      .references(() => order.id),
+    inputHash: varchar191('input_hash').notNull(),
+    input: longtext('input').notNull(),
+    status: varchar191('status').notNull(),
+    providerTaskId: varchar191('provider_task_id'),
+    outputUrl: text('output_url'),
+    errorCode: varchar191('error_code'),
+    leaseUntil: varchar191('lease_until').notNull(),
+    createdAt: varchar191('created_at').notNull(),
+    updatedAt: varchar191('updated_at').notNull(),
+  },
+  (t) => [
+    index('idx_screenshot_task_order').on(t.orderId, t.status),
+    index('idx_screenshot_task_user').on(t.userId, t.createdAt),
+  ]
+);
+
+// Credit allocations let one task combine multiple paid packs without altering legacy rights.
+export const screenshotCreditAllocation = table(
+  'screenshot_credit_allocation',
+  {
+    id: varchar191('id').primaryKey(),
+    taskId: varchar191('task_id')
+      .notNull()
+      .references(() => screenshotTask.id, { onDelete: 'cascade' }),
+    orderId: varchar191('order_id')
+      .notNull()
+      .references(() => order.id),
+    credits: int('credits').notNull(),
+  },
+  (t) => [
+    index('idx_screenshot_allocation_order').on(t.orderId),
+    index('idx_screenshot_allocation_task').on(t.taskId),
+  ]
+);

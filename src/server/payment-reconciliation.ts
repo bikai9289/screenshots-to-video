@@ -3,7 +3,10 @@ import { and, asc, eq, inArray, isNull, lt } from 'drizzle-orm';
 import { db } from '@/core/db';
 import type { PaymentSession } from '@/core/payment/types';
 import { order, userEvent } from '@/config/db/schema';
-import { screenshotPacks } from '@/config/screenshots-product';
+import {
+  legacyScreenshotPacks,
+  screenshotPacks,
+} from '@/config/screenshots-product';
 import { refreshPaymentOrder } from '@/modules/payment/service';
 import { md5 } from '@/lib/hash';
 import { paymentDisplayState } from '@/lib/payment-state';
@@ -100,7 +103,9 @@ export async function reconcilePayments() {
         eq(order.paymentProvider, 'stripe'),
         inArray(
           order.productId,
-          screenshotPacks.map((pack) => pack.productId)
+          [...screenshotPacks, ...legacyScreenshotPacks].map(
+            (pack) => pack.productId
+          )
         ),
         inArray(order.status, ['created', 'pending']),
         isNull(order.deletedAt),

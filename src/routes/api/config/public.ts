@@ -2,13 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { screenshotServiceReady } from '@/server/screenshots';
 
 import { filterPublicConfigs, getAllConfigs } from '@/modules/config/service';
-import { respData } from '@/lib/resp';
-
-const noStore = {
-  headers: {
-    'Cache-Control': 'no-store, no-cache, must-revalidate',
-  },
-};
+import { respData, respJson } from '@/lib/resp';
 
 const publicKeys = [
   'app_name',
@@ -51,7 +45,15 @@ function isEmailSendingConfigured(configs: Record<string, string>): boolean {
 }
 
 async function GET({ request }: { request: Request }) {
-  const configs = await getAllConfigs();
+  // This endpoint contains public configuration only; never cache personalized data.
+  const edge = (globalThis as unknown as { caches?: { default?: Cache } })
+    .caches?.default;
+  const cacheKey = new Request(new URL('/api/config/public', request.url), {
+    method: 'GET',
+  });
+  const cached = await edge?.match(cacheKey).catch(() => undefined);
+  if (cached) return cached;
+  const configs = await getAllConfigs({ throwOnError: true });
   const result = filterPublicConfigs(configs, publicKeys);
   result.mock = configs.mock?.trim() === '1' ? '1' : '0';
   result.screenshots_purchase_available =
@@ -79,11 +81,30 @@ async function GET({ request }: { request: Request }) {
     result.active_ai_provider = 'kie';
   }
 
-  return respData(result, noStore);
+  const response = respData(result, {
+    headers: { 'Cache-Control': 'public, max-age=0, s-maxage=60' },
+  });
+  // Only known successful responses enter the edge cache. A failed check is never
+  // changed into available=true; checkout still enforces current server settings.
+  await edge?.put(cacheKey, response.clone()).catch(() => {});
+  return response;
 }
 
 export const Route = createFileRoute('/api/config/public')({
   server: {
-    handlers: { GET },
+    handlers: {
+      GET: async (context) => {
+        try {
+          return await GET(context);
+        } catch {
+          return respJson(
+            5111,
+            'Could not check availability. Checkout will verify current settings.',
+            null,
+            { status: 503, headers: { 'Cache-Control': 'no-store' } }
+          );
+        }
+      },
+    },
   },
 });

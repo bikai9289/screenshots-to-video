@@ -75,6 +75,11 @@ async function POST({ request }: { request: Request }) {
     if (!product) {
       return respErr('Unknown product');
     }
+    const videoPack = getScreenshotPack(product_id);
+    if (videoPack?.legacy)
+      return respErr(
+        'This pack is no longer sold. Choose a current credit pack.'
+      );
 
     // Resolve the provider exactly as createCheckout will (requested, else
     // the payment manager default = default_payment_provider when that
@@ -142,7 +147,13 @@ async function POST({ request }: { request: Request }) {
       creditsValidDays: product.creditsValidDays,
       paymentOrder: {
         metadata: getScreenshotPack(product_id)
-          ? { disable_promotion_codes: 'true' }
+          ? {
+              disable_promotion_codes: 'true',
+              video_credits: String(
+                videoPack && !videoPack.legacy ? videoPack.credits : 0
+              ),
+              video_billing_version: 'credits-v1',
+            }
           : undefined,
         productId: product.productId,
         price: { amount: chargeAmount, currency: authoritativeCurrency },

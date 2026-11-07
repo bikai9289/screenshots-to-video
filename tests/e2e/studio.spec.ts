@@ -24,7 +24,12 @@ async function account(page: Page, balance = 3) {
       json: {
         code: 0,
         message: 'ok',
-        data: { remainingRenders: balance, serviceAvailable: true, tasks: [] },
+        data: {
+          remainingCredits: balance,
+          legacyRenders: 0,
+          serviceAvailable: true,
+          tasks: [],
+        },
       },
     })
   );
@@ -178,10 +183,78 @@ test('real unauthenticated screenshot API refuses access', async ({
   expect((await response.json()).data.errorKey).toBe('UNAUTHORIZED');
 });
 
-test('template generation is retired and public generator links lead to Studio',async({request})=>{
-  const old=await request.post('/api/ai/generate',{data:{mediaType:'video'}});
+test('a one-credit account can select only 5 seconds', async ({ page }) => {
+  await account(page, 1);
+  await page.goto('/studio');
+  const duration = page.getByRole('combobox', {
+    name: 'Duration',
+    exact: true,
+  });
+  await expect(duration.locator('option[value="5"]')).toHaveJSProperty(
+    'disabled',
+    false
+  );
+  await expect(duration.locator('option[value="10"]')).toHaveJSProperty(
+    'disabled',
+    true
+  );
+  await expect(duration.locator('option[value="15"]')).toHaveJSProperty(
+    'disabled',
+    true
+  );
+  await expect(page.locator('.studio-balance')).toContainText(
+    'Available video credits'
+  );
+  await expect(page.locator('.studio-charge')).toContainText(
+    'Video credits reserved for this generation: 1'
+  );
+});
+
+test('a legacy render keeps all supported durations available', async ({
+  page,
+}) => {
+  await account(page, 0);
+  await page.unroute('**/api/screenshots/account');
+  await page.route('**/api/screenshots/account', (route) =>
+    route.fulfill({
+      json: {
+        code: 0,
+        message: 'ok',
+        data: {
+          remainingCredits: 0,
+          legacyRenders: 1,
+          remainingRenders: 1,
+          serviceAvailable: true,
+          tasks: [],
+        },
+      },
+    })
+  );
+  await page.goto('/studio');
+  const duration = page.getByRole('combobox', {
+    name: 'Duration',
+    exact: true,
+  });
+  await expect(duration.locator('option[value="15"]')).toHaveJSProperty(
+    'disabled',
+    false
+  );
+  await duration.selectOption('15');
+  await expect(page.locator('.studio-charge')).toContainText(
+    'one legacy render'
+  );
+});
+
+test('template generation is retired and public generator links lead to Studio', async ({
+  request,
+}) => {
+  const old = await request.post('/api/ai/generate', {
+    data: { mediaType: 'video' },
+  });
   expect(old.status()).toBe(410);
-  const redirect=await request.get('/ai-video-generator',{maxRedirects:0});
+  const redirect = await request.get('/ai-video-generator', {
+    maxRedirects: 0,
+  });
   expect(redirect.status()).toBe(302);
   expect(redirect.headers().location).toContain('/studio');
 });

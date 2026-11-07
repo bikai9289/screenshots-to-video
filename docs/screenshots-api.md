@@ -5,7 +5,7 @@
 ## 已批准规则
 
 - 用户已确认 SeeAPI 官方平台 `api.seeapi.com`，不是 cgcm 接口。
-- 商品：USD 9.90/1 次、19.90/3 次、29.90/5 次，一次性购买；未使用次数不过期，失败任务不占次数。
+- 当前商品：USD 3.90/1 额度、9.90/3 额度、19.90/6 额度、29.90/10 额度，一次性购买。5/10/15 秒分别预留 1/2/3 个视频额度，确认系统失败后精确返还，未使用额度不过期。旧商品保留原有按次权益，不转换额度。
 - 视频权利来自本站指定商品的已支付订单；注册赠送积分和旧模板商品不能授权生成。
 - 默认模型为 `seedance-2-fast` 的 `reference-to-video`，720p、无音频、5/10/15 秒、16:9/9:16/1:1。模型可用性及实际成片须用配置后的真实账户验证。
 - 生成模型可能改变截图文字与细节，不作逐像素保真承诺。查看结果后再用于正式发布。
@@ -20,7 +20,9 @@
 
 ### GET /api/screenshots/account
 
-无请求参数。返回 `remainingRenders:number`、`serviceAvailable:boolean`、`limits`、`tasks:PublicScreenshotTask[]`。任务仅为当前用户最近记录，不返回别人的素材或供应商密钥。
+无请求参数。返回 `remainingCredits:number`（新视频额度，非通用 AI 积分）、`legacyRenders:number`（旧套餐次数）、`remainingRenders:number`（兼容旧客户端的 legacyRenders 别名）、`serviceAvailable:boolean`、`limits`、`tasks:PublicScreenshotTask[]`。余额均为非负整数；预留中的任务已从可用余额扣除。任务仅为当前用户最近记录，不返回别人的素材或供应商密钥。
+
+有旧套餐次数时优先按旧规则扣一次；否则按时长消耗新额度，可跨多笔新订单合并。分配表与任务预留在同一 atomic 批次内创建，余额不足返回 4115，不能依靠绕过前端选项获得长视频。所有贡献额度的订单都受使用中退款保护。
 
 ### POST /api/screenshots/assets
 
@@ -34,13 +36,13 @@ Multipart 表单，必选 `files`，1–4 张；单张不超过 5 MiB，合计�
 
 JSON 字段：
 
-| 字段 | 类型 | 必选/默认 | 约束 |
-| --- | --- | --- | --- |
-| idempotencyKey | string | 必选 | 8–128 位字母、数字、下划线或连字符，同一逻辑请求保持不变 |
-| assetIds | string[] | 必选 | 1–4 个，非重复，必须属于当前用户且未过期，顺序即展示顺序 |
-| prompt | string | 可选，空串 | trim 后最多 2000 字符；不是任意代码 |
-| duration | number | 必选 | 5、10、15，拒绝字符串和其他数字 |
-| aspectRatio | string | 必选 | 16:9、9:16、1:1 |
+| 字段           | 类型     | 必选/默认  | 约束                                                     |
+| -------------- | -------- | ---------- | -------------------------------------------------------- |
+| idempotencyKey | string   | 必选       | 8–128 位字母、数字、下划线或连字符，同一逻辑请求保持不变 |
+| assetIds       | string[] | 必选       | 1–4 个，非重复，必须属于当前用户且未过期，顺序即展示顺序 |
+| prompt         | string   | 可选，空串 | trim 后最多 2000 字符；不是任意代码                      |
+| duration       | number   | 必选       | 5、10、15，拒绝字符串和其他数字                          |
+| aspectRatio    | string   | 必选       | 16:9、9:16、1:1                                          |
 
 禁止客户端传入价格、次数、供应商、模型、外部图片 URL 等未知字段。返回当前 `PublicScreenshotTask`。
 
@@ -66,22 +68,23 @@ JSON 字段：
 
 HTTP 查询失败、网络超时、成功但缺失视频等不明确结果保持待核实，不自动释放购买次数。页面提示查看原任务，不引导重复购买。
 
-| errorKey | code | HTTP | 场景 |
-| --- | --- | --- | --- |
-| UNAUTHORIZED | 4101 | 401 | 无有效会话 |
-| INVALID_REQUEST | 4102 | 400 | JSON、字段、类型、枚举、空输入、重复图片不合法 |
-| PAID_ACCESS_REQUIRED | 4103 | 402 | 无对应已付订单、剩余次数不足、退款订单 |
-| NOT_FOUND | 4104 | 404 | 不存在或越权访问 |
-| ASSET_EXPIRED | 4105 | 410 | 素材已过期 |
-| IDEMPOTENCY_CONFLICT | 4106 | 409 | 同 key 不同输入，或未完成任务请求下载 |
-| UPLOAD_LIMIT | 4107 | 413 | 文件数、单文件或总字节超限 |
-| INVALID_IMAGE | 4108 | 415 | 类型、真实内容不合法 |
-| IMAGE_DIMENSIONS | 4109 | 422 | 图片尺寸或比例超限 |
-| RATE_LIMIT | 4110 | 429 | 请求过快；返回 Retry-After |
-| SERVICE_UNAVAILABLE | 4111 | 503 | SeeAPI、私有存储或支付未准备好 |
-| GENERATION_FAILED | 4112 | 422 | 明确的供应商终态失败；查询成功响应可在 data.errorCode 表示 |
-| PROVIDER_RETRY | 4113 | 503 | 状态未知需重查；查询成功响应可在 data.errorCode 表示 |
-| INTERNAL_ERROR | 4114 | 500 | 未分类内部故障，不泄露原始异常 |
+| errorKey             | code | HTTP | 场景                                                       |
+| -------------------- | ---- | ---- | ---------------------------------------------------------- |
+| UNAUTHORIZED         | 4101 | 401  | 无有效会话                                                 |
+| INVALID_REQUEST      | 4102 | 400  | JSON、字段、类型、枚举、空输入、重复图片不合法             |
+| PAID_ACCESS_REQUIRED | 4103 | 402  | 无对应已付订单、剩余次数不足、退款订单                     |
+| NOT_FOUND            | 4104 | 404  | 不存在或越权访问                                           |
+| ASSET_EXPIRED        | 4105 | 410  | 素材已过期                                                 |
+| IDEMPOTENCY_CONFLICT | 4106 | 409  | 同 key 不同输入，或未完成任务请求下载                      |
+| UPLOAD_LIMIT         | 4107 | 413  | 文件数、单文件或总字节超限                                 |
+| INVALID_IMAGE        | 4108 | 415  | 类型、真实内容不合法                                       |
+| IMAGE_DIMENSIONS     | 4109 | 422  | 图片尺寸或比例超限                                         |
+| RATE_LIMIT           | 4110 | 429  | 请求过快；返回 Retry-After                                 |
+| SERVICE_UNAVAILABLE  | 4111 | 503  | SeeAPI、私有存储或支付未准备好                             |
+| GENERATION_FAILED    | 4112 | 422  | 明确的供应商终态失败；查询成功响应可在 data.errorCode 表示 |
+| PROVIDER_RETRY       | 4113 | 503  | 状态未知需重查；查询成功响应可在 data.errorCode 表示       |
+| INTERNAL_ERROR       | 4114 | 500  | 未分类内部故障，不泄露原始异常                             |
+| INSUFFICIENT_CREDITS | 4115 | 402  | 所选时长所需额度不足，选择较短时长或购买额度               |
 
 ## 验收
 

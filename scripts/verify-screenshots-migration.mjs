@@ -16,6 +16,7 @@ try {
   if (
     !tables.includes('screenshot_asset') ||
     !tables.includes('screenshot_task') ||
+    !tables.includes('screenshot_credit_allocation') ||
     !tables.includes('order')
   )
     throw new Error('Required tables missing');

@@ -31,16 +31,18 @@ test('scenario pages are crawlable, localized and linked by sitemap', async ({
   expect(appHtml).toContain('developer.apple.com');
 });
 
-test('pricing averages and attributed privacy facts are present without JavaScript', async ({
+test('credit prices and attributed privacy facts are present without JavaScript', async ({
   request,
 }) => {
   const html = (await (await request.get('/pricing')).text()).replace(
     /<!--.*?-->/g,
     ''
   );
-  for (const amount of ['9.90', '6.63', '5.98'])
+  for (const amount of ['3.90', '9.90', '19.90', '29.90'])
     expect(html).toContain('$' + amount);
   expect(html).toContain('SeeAPI states');
+  expect(html).not.toContain('rounded average');
+  expect(html).toContain('10 video credits');
   expect(html).toContain('no scheduled automatic expiry');
 });
 
@@ -78,8 +80,8 @@ test('both homepages explain real limits and failure handling in initial HTML', 
   request,
 }) => {
   for (const [path, failure] of [
-    ['/', 'A task reserves one paid render.'],
-    ['/zh', '任务受理时会预留一次制作次数。'],
+    ['/', 'A task reserves 1, 2 or 3 video credits'],
+    ['/zh', '任务分别预留 1、2、3 个视频额度'],
   ]) {
     const response = await request.get(path);
     expect(response.status()).toBe(200);

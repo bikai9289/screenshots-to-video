@@ -13,7 +13,7 @@ export function productDiscovery(
   const url = (path: string) => new URL(path, origin).href;
   const prices = screenshotPacks.map(
     (pack) =>
-      `USD ${(pack.priceInCents / 100).toFixed(2)} for ${pack.renders} ${pack.renders === 1 ? 'render' : 'renders'}`
+      `USD ${(pack.priceInCents / 100).toFixed(2)} for ${pack.credits} video ${pack.credits === 1 ? 'credit' : 'credits'}`
   );
   const lines = [
     '# Screenshots to Video',
@@ -25,8 +25,8 @@ export function productDiscovery(
     '- Output: 720p MP4, 5, 10 or 15 seconds, with 16:9, 9:16 or 1:1 framing. Generated audio is disabled.',
     `- Input: up to ${screenshotLimits.maxFiles} PNG, JPEG or WebP screenshots; ${screenshotLimits.maxFileBytes / 1024 / 1024} MiB per file, ${screenshotLimits.maxTotalBytes / 1024 / 1024} MiB total. SVG is not accepted.`,
     `- One-time packs: ${prices.join('; ')}. No subscription and no free generation.`,
-    '- A new successful generation uses one paid render. A confirmed failure returns its reserved render; an uncertain timeout is not treated as failure.',
-    '- Video generation requires an account and paid render rights. Examples and the public contact form do not require an account.',
+    '- A 5-second video uses 1 credit, 10 seconds uses 2 credits, and 15 seconds uses 3 credits. Confirmed system failures return reserved credits; an uncertain timeout is not treated as failure. Completed videos with unwanted style or UI changes do not include a free redo.',
+    '- Video generation requires an account and paid video credits or legacy render rights. Examples and the public contact form do not require an account. Earlier render packs retain their original rights.',
     '',
     '## Public pages',
     '',
@@ -59,8 +59,8 @@ export function productDiscovery(
       '',
       '## Generation and billing',
       '',
-      'A task reserves a render when accepted. Confirmed failures release the reservation. A temporary submission or status-query error keeps the original task available for checking; it does not automatically reverse a pack payment.',
-      'Changing settings and creating another successful video uses another render. Downloading an existing available result does not use a render. Unused render rights do not have an application expiry.',
+      'A task reserves its required credits when accepted. Confirmed failures release the reservation. A temporary submission or status-query error keeps the original task available for checking; it does not automatically reverse a pack payment. Recovery reuses the same provider idempotency key; it does not start a fresh paid generation.',
+      'Changing settings and creating another successful video uses credits again. Downloading an existing available result does not use credits. Unused video credits do not have an application expiry. Legacy render packs remain separate and keep their original per-video rules.',
       '',
       '## Public generation examples',
       '',
