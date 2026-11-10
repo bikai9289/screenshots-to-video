@@ -3499,5 +3499,8 @@
   "landing.screenshots.legacyBalance": "__COUNT__ legacy renders also available",
   "landing.screenshots.legacyCharge": "This generation reserves one legacy render, valid for any supported duration.",
   "landing.screenshots.faq12Question": "What counts as a failed generation?",
-  "landing.screenshots.faq12Answer": "A confirmed system failure to produce a video returns the reserved credits. A completed video whose style or interface details you dislike is not a system failure and does not include a free redo. A timeout alone does not prove failure; check the existing task."
+  "landing.screenshots.faq12Answer": "A confirmed system failure to produce a video returns the reserved credits. A completed video whose style or interface details you dislike is not a system failure and does not include a free redo. A timeout alone does not prove failure; check the existing task. Each task allows at most 3 automatic submission attempts in total, including the first, using the same request key. Status checks do not create another video. If the submission result is still unknown at the limit, automatic submission stops and credits remain reserved; contact support with the task ID. Confirmed failed tasks are not automatically regenerated.",
+  "landing.screenshots.useCasesTitle": "More ways to use your screenshots",
+  "landing.screenshots.error_SUBMISSION_LIMIT_REACHED": "Automatic submission stopped after 3 attempts. Contact support with this task ID. Credits stay reserved until the result is confirmed.",
+  "landing.screenshots.taskIdLabel": "Task ID"
 }

@@ -62,6 +62,9 @@ export function getScreenshotPack(productId: string | null | undefined) {
 
 export const screenshotCreditCost = { 5: 1, 10: 2, 15: 3 } as const;
 
+// Includes the initial submission. Status queries do not consume attempts.
+export const MAX_SCREENSHOT_SUBMISSION_ATTEMPTS = 3;
+
 export const screenshotLimits = {
   maxFiles: 4,
   maxFileBytes: 5 * 1024 * 1024,

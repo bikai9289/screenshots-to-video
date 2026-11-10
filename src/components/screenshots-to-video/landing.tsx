@@ -441,7 +441,13 @@ function Examples({ copy }: { copy: ScreenshotsCopy }) {
   );
 }
 
-export function ScreenshotLanding({ copy }: { copy: ScreenshotsCopy }) {
+export function ScreenshotLanding({
+  copy,
+  useCases,
+}: {
+  copy: ScreenshotsCopy;
+  useCases: { href: string; title: string; description: string }[];
+}) {
   return (
     <div className="stv-site">
       <ScreenshotHeader copy={copy} />
@@ -590,6 +596,26 @@ export function ScreenshotLanding({ copy }: { copy: ScreenshotsCopy }) {
           </div>
         </section>
         <RealDemo copy={copy} />
+        <section
+          className="screenshot-use-cases wrap section"
+          aria-labelledby="use-cases-title"
+        >
+          <p className="eyebrow">{copy.useCasesEyebrow}</p>
+          <h2 id="use-cases-title">{copy.useCasesTitle}</h2>
+          <div className="screenshot-use-case-grid">
+            {useCases.map((item) => (
+              <article key={item.href}>
+                <h3>
+                  <Link href={item.href}>
+                    {item.title}
+                    <ArrowUpRight aria-hidden="true" />
+                  </Link>
+                </h3>
+                <p>{item.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
         <section className="paid-section" id="paid-access">
           <div className="wrap paid-inner">
             <div>

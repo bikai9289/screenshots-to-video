@@ -770,6 +770,7 @@ export const screenshotTask = table(
     outputUrl: text('output_url'),
     errorCode: varchar191('error_code'),
     leaseUntil: varchar191('lease_until').notNull(),
+    submissionAttempts: int('submission_attempts').notNull().default(0),
     createdAt: varchar191('created_at').notNull(),
     updatedAt: varchar191('updated_at').notNull(),
   },

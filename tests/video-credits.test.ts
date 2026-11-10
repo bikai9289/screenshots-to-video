@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -15,6 +15,40 @@ let service: typeof import('../src/modules/screenshots/service');
 let database: ReturnType<(typeof import('../src/core/db'))['db']>;
 let schema: typeof import('../src/config/db/schema');
 let dispose: (() => Promise<void>) | undefined;
+
+it('migrates old uncertain submissions conservatively while preserving fresh and known-provider tasks', async () => {
+  const { createClient } = await import('@libsql/client');
+  const client = createClient({ url: ':memory:' });
+  try {
+    await client.execute(
+      'CREATE TABLE screenshot_task (id TEXT PRIMARY KEY, status TEXT NOT NULL, lease_until TEXT NOT NULL)'
+    );
+    await client.execute(
+      "INSERT INTO screenshot_task VALUES ('fresh','reserved','1970-01-01T00:00:00.000Z'), ('unknown','reserved','2026-11-09T00:00:00.000Z'), ('known','processing','2026-11-09T00:00:00.000Z'), ('done','failed','2026-11-09T00:00:00.000Z')"
+    );
+    for (const statement of readFileSync(
+      'drizzle/sqlite/0002_furry_jean_grey.sql',
+      'utf8'
+    ).split('--> statement-breakpoint')) {
+      await client.execute(statement);
+    }
+    const rows = (
+      await client.execute(
+        'SELECT id, status, submission_attempts FROM screenshot_task ORDER BY id'
+      )
+    ).rows;
+    expect(
+      rows.map((row) => [row.id, row.status, row.submission_attempts])
+    ).toEqual([
+      ['done', 'failed', 0],
+      ['fresh', 'reserved', 0],
+      ['known', 'processing', 0],
+      ['unknown', 'reserved', 3],
+    ]);
+  } finally {
+    client.close();
+  }
+});
 beforeAll(async () => {
   execFileSync(
     process.execPath,

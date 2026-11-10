@@ -266,7 +266,10 @@
     "legacyBalance": "__COUNT__ legacy renders also available",
     "legacyCharge": "This generation reserves one legacy render, valid for any supported duration.",
     "faq12Question": "What counts as a failed generation?",
-    "faq12Answer": "A confirmed system failure to produce a video returns the reserved credits. A completed video whose style or interface details you dislike is not a system failure and does not include a free redo. A timeout alone does not prove failure; check the existing task."
+    "faq12Answer": "A confirmed system failure to produce a video returns the reserved credits. A completed video whose style or interface details you dislike is not a system failure and does not include a free redo. A timeout alone does not prove failure; check the existing task. Each task allows at most 3 automatic submission attempts in total, including the first, using the same request key. Status checks do not create another video. If the submission result is still unknown at the limit, automatic submission stops and credits remain reserved; contact support with the task ID. Confirmed failed tasks are not automatically regenerated.",
+    "useCasesTitle": "More ways to use your screenshots",
+    "taskIdLabel": "Task ID",
+    "error_SUBMISSION_LIMIT_REACHED": "Automatic submission stopped after 3 attempts. Contact support with this task ID. Credits stay reserved until the result is confirmed."
   },
   "zh": {
     "playRealDemo": "播放生成视频",
@@ -535,6 +538,9 @@
     "legacyBalance": "另有 __COUNT__ 次旧套餐制作次数",
     "legacyCharge": "本次预留一次旧套餐制作次数，可选择任一支持的时长。",
     "faq12Question": "什么情况算生成失败？",
-    "faq12Answer": "确认系统未能产出视频时返还预留额度。已完成视频的风格或界面细节不满意，不属于系统失败，也不包含免费重做。仅超时不能证明失败，请查询原任务。"
+    "faq12Answer": "确认系统未能产出视频时返还预留额度。已完成视频的风格或界面细节不满意，不属于系统失败，也不包含免费重做。仅超时不能证明失败，请查询原任务。每个任务最多自动提交 3 次（含首次），始终使用同一请求标识；状态查询不会重新生成视频。达到上限后如果提交结果仍不明，系统停止自动提交并保留预留额度，请携带任务 ID 联系支持。已确认失败的任务不会自动重新生成。",
+    "useCasesTitle": "让截图用于更多发布场景",
+    "taskIdLabel": "任务 ID",
+    "error_SUBMISSION_LIMIT_REACHED": "自动提交已达 3 次上限。请携带任务 ID 联系支持；结果确认前额度仍保留。"
   }
 }

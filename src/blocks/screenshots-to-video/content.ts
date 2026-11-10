@@ -274,5 +274,9 @@ export function getScreenshotsCopy() {
     legacyCharge: m['landing.screenshots.legacyCharge'](),
     faq12Question: m['landing.screenshots.faq12Question'](),
     faq12Answer: m['landing.screenshots.faq12Answer'](),
+    useCasesTitle: m['landing.screenshots.useCasesTitle'](),
+    taskIdLabel: m['landing.screenshots.taskIdLabel'](),
+    error_SUBMISSION_LIMIT_REACHED:
+      m['landing.screenshots.error_SUBMISSION_LIMIT_REACHED'](),
   };
 }

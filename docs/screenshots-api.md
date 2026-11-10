@@ -89,3 +89,9 @@ HTTP 查询失败、网络超时、成功但缺失视频等不明确结果保持
 ## 验收
 
 覆盖订单状态、赠送积分绕过、并发最后一次额度、同 key 重放与冲突、越权、全部上传边界、失败释放、终态不可回退、供应商创建超时恢复、查询失败不返还、下载鉴权、支付金额核对。SeeAPI 与支付真实验收需对应账户及测试配置，单元测试不能替代。
+
+## Submission recovery limit (2026-11-10)
+
+`screenshot_task.submission_attempts` is a server-only persisted counter, not a request parameter or public response field. Each task allows at most 3 automatic provider submissions in total, including the initial submission. Atomic claims enforce the cap across concurrent requests, polling, maintenance and restarts. Recovery uses the same provider idempotency key and stored request body. Status queries are not generation submissions and do not consume this limit.
+
+When the limit has been reached and the final submission lease has expired, the task remains `reserved` with `errorCode: SUBMISSION_LIMIT_REACHED`. Existing `PublicScreenshotTask` fields and response envelopes are unchanged. Error definition: code **4116**, HTTP **503** when returned as an API error; successful task reads still return HTTP 200 with the error in `data.errorCode`. The user is instructed to contact support with the task ID. Credits remain reserved while the outcome is unknown; a confirmed provider terminal failure releases them. Do not mark the task failed solely because of timeouts or the cap. A completed provider result can still settle the original task, and terminal tasks cannot be restarted.

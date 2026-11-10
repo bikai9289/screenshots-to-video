@@ -93,6 +93,12 @@ export const studioErrors = {
     message:
       'Not enough credits for this duration. Choose a shorter video or buy credits.',
   },
+  SUBMISSION_LIMIT_REACHED: {
+    code: 4116,
+    status: 503,
+    message:
+      'Automatic submission stopped after 3 attempts. Contact support with this task ID. Credits remain reserved until the outcome is confirmed.',
+  },
 } as const;
 export type StudioErrorKey = keyof typeof studioErrors;
 export class StudioError extends Error {

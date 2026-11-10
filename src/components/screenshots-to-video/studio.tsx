@@ -364,6 +364,19 @@ export function ScreenshotStudio(props: StudioProps) {
                           copy.error_INTERNAL_ERROR}
                       </p>
                     )}
+                    {selected.errorCode === 'SUBMISSION_LIMIT_REACHED' && (
+                      <div className="studio-help">
+                        <p>
+                          {copy.taskIdLabel}:{' '}
+                          <code style={{ overflowWrap: 'anywhere' }}>
+                            {selected.id}
+                          </code>
+                        </p>
+                        <Link href="/contact" className="button text-button">
+                          {copy.contactAction}
+                        </Link>
+                      </div>
+                    )}
                     {selected.status === 'success' ? (
                       <a
                         className="button dark"

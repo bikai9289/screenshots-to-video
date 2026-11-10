@@ -14,54 +14,66 @@ Object.assign(process.env, {
 let service: typeof import('./service');
 let database: ReturnType<(typeof import('@/core/db'))['db']>;
 let schema: typeof import('@/config/db/schema');
-let disposeD1:(()=>Promise<void>)|undefined;
-beforeAll(async () => {
-  execFileSync(
-    process.execPath,
-    [
-      'node_modules/drizzle-kit/bin.cjs',
-      'push',
-      '--dialect=sqlite',
-      '--schema=./src/config/db/schema.sqlite.ts',
-      `--url=${process.env.DATABASE_URL}`,
-    ],
-    { stdio: 'pipe' }
-  );
-  if(process.env.ATOMIC_D1==='1'){
-    const {createClient}=await import('@libsql/client');
-    const sqlite=createClient({url:process.env.DATABASE_URL!});
-    const ddl=(await sqlite.execute("select sql from sqlite_master where sql is not null and name not like 'sqlite_%' and name not like '__drizzle%' order by type = 'index'")).rows.map(row=>String(row.sql));
-    sqlite.close();
-    const {getPlatformProxy}=await import('wrangler');
-    const proxy=await getPlatformProxy<{DB:any}>({configPath:'tests/fixtures/wrangler.atomic.jsonc',persist:{path:join(dir,'d1')}});
-    for(const statement of ddl)await proxy.env.DB.prepare(statement).run();
-    (globalThis as any).__CF_ENV__=proxy.env;
-    process.env.DATABASE_PROVIDER='d1';
-    disposeD1=proxy.dispose;
-  }
-  service = await import('./service');
-  database = (await import('@/core/db')).db();
-  schema = await import('@/config/db/schema');
-  await database
-    .insert(schema.user)
-    .values({ id: 'u1', name: 'Test', email: 'u1@example.test' });
-  await database
-    .insert(schema.user)
-    .values({ id: 'u2', name: 'Other', email: 'u2@example.test' });
-  await database.insert(schema.screenshotAsset).values({
-    id: 'asset-1234',
-    userId: 'u1',
-    objectKey: 'private/a.png',
-    mimeType: 'image/png',
-    byteSize: 100,
-    width: 1000,
-    height: 650,
-    createdAt: new Date().toISOString(),
-    expiresAt: new Date(Date.now() + 86400000).toISOString(),
-  });
-}, process.env.ATOMIC_D1==='1'?120_000:30_000);
+let disposeD1: (() => Promise<void>) | undefined;
+beforeAll(
+  async () => {
+    execFileSync(
+      process.execPath,
+      [
+        'node_modules/drizzle-kit/bin.cjs',
+        'push',
+        '--dialect=sqlite',
+        '--schema=./src/config/db/schema.sqlite.ts',
+        `--url=${process.env.DATABASE_URL}`,
+      ],
+      { stdio: 'pipe' }
+    );
+    if (process.env.ATOMIC_D1 === '1') {
+      const { createClient } = await import('@libsql/client');
+      const sqlite = createClient({ url: process.env.DATABASE_URL! });
+      const ddl = (
+        await sqlite.execute(
+          "select sql from sqlite_master where sql is not null and name not like 'sqlite_%' and name not like '__drizzle%' order by type = 'index'"
+        )
+      ).rows.map((row) => String(row.sql));
+      sqlite.close();
+      const { getPlatformProxy } = await import('wrangler');
+      const proxy = await getPlatformProxy<{ DB: any }>({
+        configPath: 'tests/fixtures/wrangler.atomic.jsonc',
+        persist: { path: join(dir, 'd1') },
+      });
+      for (const statement of ddl) await proxy.env.DB.prepare(statement).run();
+      (globalThis as any).__CF_ENV__ = proxy.env;
+      process.env.DATABASE_PROVIDER = 'd1';
+      disposeD1 = proxy.dispose;
+    }
+    service = await import('./service');
+    database = (await import('@/core/db')).db();
+    schema = await import('@/config/db/schema');
+    await database
+      .insert(schema.user)
+      .values({ id: 'u1', name: 'Test', email: 'u1@example.test' });
+    await database
+      .insert(schema.user)
+      .values({ id: 'u2', name: 'Other', email: 'u2@example.test' });
+    await database.insert(schema.screenshotAsset).values({
+      id: 'asset-1234',
+      userId: 'u1',
+      objectKey: 'private/a.png',
+      mimeType: 'image/png',
+      byteSize: 100,
+      width: 1000,
+      height: 650,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 86400000).toISOString(),
+    });
+  },
+  process.env.ATOMIC_D1 === '1' ? 120_000 : 30_000
+);
 
-afterAll(async()=>{await disposeD1?.();},30_000);
+afterAll(async () => {
+  await disposeD1?.();
+}, 30_000);
 
 const request = (key: string) => ({
   idempotencyKey: key,
@@ -91,7 +103,7 @@ async function purchase(
   });
 }
 
-describe(`paid render reservations on ${process.env.ATOMIC_D1==='1'?'local D1':'SQLite'} atomic batches`, () => {
+describe(`paid render reservations on ${process.env.ATOMIC_D1 === '1' ? 'local D1' : 'SQLite'} atomic batches`, () => {
   it('refuses trial balances, legacy products and unpaid orders', async () => {
     await purchase('unpaid', 'created');
     await purchase('legacy', 'paid', 'starter_monthly');
@@ -214,5 +226,45 @@ describe(`paid render reservations on ${process.env.ATOMIC_D1==='1'?'local D1':'
     expect(await service.getRenderBalance('u1')).toBe(1);
     const grants = await database.select().from(schema.credit);
     expect(grants).toHaveLength(0);
+  });
+  it('caps submission recovery at three durable claims, including concurrent polls, without releasing uncertain credits', async () => {
+    const { eq } = await import('drizzle-orm');
+    await purchase('retry-cap-order');
+    const task = await service.reserveRender({
+      userId: 'u1',
+      request: request('retry-cap-request'),
+      signAsset,
+    });
+    const balance = await service.getRenderBalance('u1');
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const claims = await Promise.all([
+        service.claimSubmission('u1', task.id),
+        service.claimSubmission('u1', task.id),
+      ]);
+      expect(claims.filter(Boolean)).toHaveLength(1);
+      expect((await service.findRender('u1', task.id)).submissionAttempts).toBe(
+        attempt
+      );
+      await database
+        .update(schema.screenshotTask)
+        .set({ leaseUntil: '1970-01-01T00:00:00.000Z' })
+        .where(eq(schema.screenshotTask.id, task.id));
+    }
+    expect(await service.claimSubmission('u1', task.id)).toBeNull();
+    expect(await service.claimSubmission('u1', task.id)).toBeNull();
+    expect(await service.findRender('u1', task.id)).toMatchObject({
+      status: 'reserved',
+      submissionAttempts: 3,
+      errorCode: 'SUBMISSION_LIMIT_REACHED',
+    });
+    expect(await service.getRenderBalance('u1')).toBe(balance);
+    // A delayed known provider result can still settle the original task.
+    await service.settleRender(task.id, {
+      id: 'recovered-cap',
+      status: 'failed',
+      videoUrl: null,
+    });
+    expect(await service.getRenderBalance('u1')).toBe(balance + 1);
+    expect(await service.claimSubmission('u1', task.id)).toBeNull();
   });
 });

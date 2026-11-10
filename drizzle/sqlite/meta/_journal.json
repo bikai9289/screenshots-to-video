@@ -15,6 +15,13 @@
       "when": 1794018947501,
       "tag": "0001_previous_anthem",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794294516980,
+      "tag": "0002_furry_jean_grey",
+      "breakpoints": true
     }
   ]
 }

@@ -31,6 +31,34 @@ test('scenario pages are crawlable, localized and linked by sitemap', async ({
   expect(appHtml).toContain('developer.apple.com');
 });
 
+test('both homepages link to scenarios in the main content after real samples', async ({
+  page,
+}) => {
+  for (const prefix of ['', '/zh']) {
+    await page.goto(prefix || '/');
+    const section = page.locator('main .screenshot-use-cases');
+    await expect(section.getByRole('heading', { level: 2 })).toBeVisible();
+    for (const path of [
+      '/screenshot-to-demo-video',
+      '/screenshot-to-app-store-preview-video',
+      '/feature-announcement-video',
+    ]) {
+      await expect(section.locator(`a[href="${prefix}${path}"]`)).toBeVisible();
+    }
+    expect(
+      await section.evaluate((el) =>
+        Boolean(el.previousElementSibling?.querySelector('video'))
+      )
+    ).toBe(true);
+    await expect(page.locator('#faq')).toContainText(
+      prefix ? '最多自动提交 3 次' : 'at most 3 automatic submission attempts'
+    );
+    const html = await (await page.request.get(prefix || '/')).text();
+    expect(html).toContain('screenshot-use-cases');
+    expect(html).not.toContain('landing.screenshots.useCasesTitle');
+  }
+});
+
 test('credit prices and attributed privacy facts are present without JavaScript', async ({
   request,
 }) => {

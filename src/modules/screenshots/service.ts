@@ -23,6 +23,7 @@ import {
 import {
   getScreenshotPack,
   legacyScreenshotPacks,
+  MAX_SCREENSHOT_SUBMISSION_ATTEMPTS,
   screenshotCreditCost,
   screenshotPacks,
 } from '@/config/screenshots-product';
@@ -328,6 +329,22 @@ export async function claimSubmission(userId: string, id: string) {
   const task = await findRender(userId, id);
   const now = new Date().toISOString();
   if (task.status !== 'reserved' || task.leaseUntil > now) return null;
+  if (task.submissionAttempts >= MAX_SCREENSHOT_SUBMISSION_ATTEMPTS) {
+    // An unknown submission may already have been charged upstream. Retain the
+    // reservation for reconciliation; reaching the limit is not proof of failure.
+    await db()
+      .update(screenshotTask)
+      .set({ errorCode: 'SUBMISSION_LIMIT_REACHED', updatedAt: now })
+      .where(
+        and(
+          eq(screenshotTask.id, id),
+          eq(screenshotTask.status, 'reserved'),
+          lt(screenshotTask.leaseUntil, now),
+          sql`${screenshotTask.submissionAttempts} >= ${MAX_SCREENSHOT_SUBMISSION_ATTEMPTS}`
+        )
+      );
+    return null;
+  }
   try {
     await atomic((q) => [
       guard({
@@ -336,7 +353,11 @@ export async function claimSubmission(userId: string, id: string) {
         where: eq(screenshotTask.id, id),
         require: and(
           eq(screenshotTask.status, 'reserved'),
-          lt(screenshotTask.leaseUntil, now)
+          lt(screenshotTask.leaseUntil, now),
+          lt(
+            screenshotTask.submissionAttempts,
+            MAX_SCREENSHOT_SUBMISSION_ATTEMPTS
+          )
         )!,
         message: 'Submission claimed',
       }),
@@ -344,6 +365,7 @@ export async function claimSubmission(userId: string, id: string) {
         .update(screenshotTask)
         .set({
           leaseUntil: new Date(Date.now() + 60_000).toISOString(),
+          submissionAttempts: sql`${screenshotTask.submissionAttempts} + 1`,
           updatedAt: now,
         })
         .where(eq(screenshotTask.id, id)),

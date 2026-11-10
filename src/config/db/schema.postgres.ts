@@ -848,6 +848,7 @@ export const screenshotTask = table(
     outputUrl: text('output_url'),
     errorCode: text('error_code'),
     leaseUntil: text('lease_until').notNull(),
+    submissionAttempts: integer('submission_attempts').notNull().default(0),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
   },

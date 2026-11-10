@@ -3498,5 +3498,8 @@
   "landing.screenshots.legacyBalance": "另有 __COUNT__ 次旧套餐制作次数",
   "landing.screenshots.legacyCharge": "本次预留一次旧套餐制作次数，可选择任一支持的时长。",
   "landing.screenshots.faq12Question": "什么情况算生成失败？",
-  "landing.screenshots.faq12Answer": "确认系统未能产出视频时返还预留额度。已完成视频的风格或界面细节不满意，不属于系统失败，也不包含免费重做。仅超时不能证明失败，请查询原任务。"
+  "landing.screenshots.faq12Answer": "确认系统未能产出视频时返还预留额度。已完成视频的风格或界面细节不满意，不属于系统失败，也不包含免费重做。仅超时不能证明失败，请查询原任务。每个任务最多自动提交 3 次（含首次），始终使用同一请求标识；状态查询不会重新生成视频。达到上限后如果提交结果仍不明，系统停止自动提交并保留预留额度，请携带任务 ID 联系支持。已确认失败的任务不会自动重新生成。",
+  "landing.screenshots.useCasesTitle": "让截图用于更多发布场景",
+  "landing.screenshots.error_SUBMISSION_LIMIT_REACHED": "自动提交已达 3 次上限。请携带任务 ID 联系支持；结果确认前额度仍保留。",
+  "landing.screenshots.taskIdLabel": "任务 ID"
 }
